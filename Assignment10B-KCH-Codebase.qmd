@@ -1,0 +1,219 @@
+---
+title: "Assignment10B-KCH-Approach"
+author: "Kailot C. Harris"
+date: "2026/11/03"
+format:
+  html:
+    toc: true
+    code-fold: true
+    code-overflow: wrap
+editor: visual
+theme:
+  dark: darkly
+  light: flatly
+bibliography: references.bib
+---
+
+# Introduction and Overview
+
+In this assignment, structured web data acquisition and JSON data reshaping are applied to analyze scientific history via the Nobel Prize Developer Zone API [@nobelprizeAPI].
+
+Using the Version 2.1 REST API, laureate-level records across the physical sciences (specifically Physics and Chemistry) are ingested. The raw data are parsed from hierarchical, nested JSON documents into rectangular, tidy data frames using the `jsonlite` [@jsonlite] and `tidyverse` [@tidyverse] ecosystems.
+
+Beyond standard frequency counts, this study investigates historical mobility, collaboration, and career trajectories of famed scientists. Specifically, this work aims to examine scientific migration ("brain drain"), age distributions at time of recognition, institutional concentration of awards, seasonal birth distributions, and repeat prize winners.
+
+# Approach
+
+1.  Ingest API data
+
+- Retrieve records from the `https://api.nobelprize.org/2.1/laureates` endpoint using `httr2`
+
+- Parse raw JSON strings into structured R objects using `jsonlite::fromJSON`.
+
+2.  Reshape and tidy nested structures
+
+- Unnest nested array columns into tidy formats
+
+3.  Investigate five research questions
+
+- Which countries have experienced the largest net "brain drain" versus "brain gain" among Physics and Chemistry laureates?
+
+- How has the average age of laureates at the time of their award changed over the decades in Physics compared to Chemistry?
+
+- Which universities or research institutions have produced the most Nobel laureates across Physics and Chemistry?
+
+- Does the distribution of birth months among Physics and Chemistry laureates show evidence of a "relative age effect"?
+
+- Which individuals have won multiple Nobel prizes in Physics or Chemistry (or crossed between both), and what was the time gap between their awards?
+
+4.  Summarize analysis with visualizations and tables
+
+# Codebase
+
+## Data loading
+
+```{r}
+#| label: library-load
+#| echo: false
+#| message: false
+#| warning: false
+
+library(httr2)
+library(jsonlite)
+library(tidyverse)
+library(lubridate)
+```
+
+```{r}
+#| label: api-try-catch
+#| echo: true
+#| message: false
+#| warning: false
+
+get_nobel_data <- function(file = "laureates.rds") {
+
+  if (file.exists(file)) {
+    return(readRDS(file))
+  }
+  
+  url <- "https://api.nobelprize.org/2.1/laureates?limit=1000"
+  
+  data <- tryCatch(
+    {
+      res <- fromJSON(url)
+      df <- res$laureates
+      saveRDS(df, file)
+      df
+    },
+    error = function(e) {
+      return(NULL)
+    }
+  )
+  
+  return(data)
+}
+```
+
+```{r}
+#| label: get-data
+#| echo: true
+#| message: false
+#| warning: false
+
+laureates_raw <- get_nobel_data()
+
+nrow(laureates_raw)
+
+ncol(laureates_raw)
+```
+
+## Data tidying and unnesting
+
+In the Nobel Prize API, institutional affiliations are stored as nested list-columns. An individual award record may contain a single affiliated institution, multiple concurrent institutions, or none at all (represented as an empty or missing data frame).
+
+Directly unnesting this column causes indexing errors and row-multiplication issues. To resolve this, `purrr::map_chr()` iterates row-by-row through the list-column using defensive validation logic.
+
+This approach flattens the nested structures into consistent, vector-safe character strings while preserving the one-row-per-award observation granularity required for tidy analysis.
+
+```{r}
+
+laureates_clean <- laureates_raw |> 
+  mutate(id = id,
+         known_name = knownName$en,
+         birth_date = birth$date,
+         birth_country = birth$place$country$en,
+         nobelPrizes = nobelPrizes,
+         .keep = "none"
+          ) |> 
+  unnest(nobelPrizes) |> 
+  mutate(
+    id = id,
+    known_name = known_name,
+    birth_date = birth_date,
+    birth_country = birth_country,
+    award_year = as.numeric(awardYear),
+    category = category$en,
+    affiliations = affiliations,
+    .keep = "none"
+  ) |>
+  filter(category %in% c("Physics", "Chemistry"))
+  
+
+```
+
+Using date parsing and regex, birth dates are transformed into chronological `age_at_award`, award `decade`, and ordered `birth_month` factors while preserving missing records.
+
+```{r}
+
+laureates_tidy <- laureates_clean |> 
+  mutate(
+    affiliation_name = map_chr(affiliations, ~ {
+      if (is.data.frame(.x) && "name" %in% names(.x) && nrow(.x) > 0) {
+        return(.x$name$en[1])
+      }
+      return(NA_character_)
+    }),
+    affiliation_country = map_chr(affiliations, ~ {
+      if (is.data.frame(.x) && "country" %in% names(.x) && nrow(.x) > 0) {
+        return(.x$country$en[1])
+      }
+      return(NA_character_)
+    }),
+    birth_year = as.numeric(str_extract(birth_date, "^[0-9]{4}")),
+    birth_month = factor(
+      format(as.Date(birth_date), "%b"),
+      levels = month.abb
+    ),
+    age_at_award = award_year - birth_year,
+    decade = (award_year %/% 10) * 10
+  )
+```
+
+## Question 1
+
+```{r}
+#| label: question-1
+#| echo: true
+#| message: false
+#| warning: false
+
+mobile_laureates <- laureates_tidy |>
+  filter(!is.na(birth_country), !is.na(affiliation_country)) |>
+  filter(birth_country != affiliation_country)
+
+drain <- mobile_laureates |>
+  count(country = birth_country, name = "emigrated")
+
+gain <- mobile_laureates |>
+  count(country = affiliation_country, name = "immigrated")
+
+net_mobility <- full_join(gain, 
+                          drain, 
+                          by = "country") |>
+  replace_na(list(immigrated = 0, 
+                  emigrated = 0)) |>
+  mutate(net_gain = immigrated - emigrated) |>
+  arrange(desc(net_gain))
+
+top_gainers <- head(net_mobility, 5) |> 
+  mutate(Status = "Top Net Gainers")
+top_losers  <- tail(net_mobility, 5) |> 
+  arrange(net_gain) |> 
+  mutate(Status = "Top Net Losers")
+
+summary_table <- bind_rows(
+  top_gainers, 
+  top_losers) |>
+  select(Status, 
+         Country = country, 
+         Immigrated = immigrated, 
+         Emigrated = emigrated, 
+         `Net Gain` = net_gain)
+
+knitr::kable(summary_table, caption = "Net Mobility in Physics and Chemistry")
+```
+
+# Cited Works
+
+::: {#refs}
+:::

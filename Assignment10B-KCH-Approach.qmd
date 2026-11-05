@@ -11,20 +11,44 @@ editor: visual
 theme:
   dark: darkly
   light: flatly
+bibliography: references.bib
 ---
 
 # Introduction and Overview
 
-In this assignment, 
+In this assignment, structured web data acquisition and JSON data reshaping are applied to analyze scientific history via the Nobel Prize Developer Zone API [@nobelprizeAPI].
+
+Using the Version 2.1 REST API, laureate-level records across the physical sciences (specifically Physics and Chemistry) are ingested. The raw data are parsed from hierarchical, nested JSON documents into rectangular, tidy data frames using the `jsonlite` [@jsonlite] and `tidyverse` [@tidyverse] ecosystems.
+
+Beyond standard frequency counts, this study investigates historical mobility, collaboration, and career trajectories of famed scientists. Specifically, this work aims to examine scientific migration ("brain drain"), age distributions at time of recognition, institutional concentration of awards, seasonal birth distributions, and repeat prize winners.
 
 # Approach
 
-1.  
+1.  Ingest API data
 
-2.
+- Retrieve records from the `https://api.nobelprize.org/2.1/laureates` endpoint using `httr2`
 
-3.
+- Parse raw JSON strings into structured R objects using `jsonlite::fromJSON`.
 
-4.
+2.  Reshape and tidy nested structures
 
-5.
+- Unnest nested array columns into tidy formats
+
+3.  Investigate five research questions
+
+- Which countries have experienced the largest net "brain drain" versus "brain gain" among Physics and Chemistry laureates?
+
+- How has the average age of laureates at the time of their award changed over the decades in Physics compared to Chemistry?
+
+- Which universities or research institutions have produced the most Nobel laureates across Physics and Chemistry?
+
+- Does the distribution of birth months among Physics and Chemistry laureates show evidence of a "relative age effect"?
+
+- Which individuals have won multiple Nobel prizes in Physics or Chemistry (or crossed between both), and what was the time gap between their awards?
+
+4.  Summarize analysis with visualizations and tables
+
+# Cited Works
+
+::: {#refs}
+:::
