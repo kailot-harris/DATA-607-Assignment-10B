@@ -171,6 +171,8 @@ laureates_tidy <- laureates_clean |>
 
 ## Question 1
 
+### Which countries have experienced the largest net "brain drain" versus "brain gain" among Physics and Chemistry laureates?
+
 ```{r}
 #| label: question-1
 #| echo: true
@@ -226,14 +228,14 @@ knitr::kable(mobility_summary_table, caption = "Net Mobility in Physics and Chem
 #| message: false
 #| warning: false
 
-plot_data <- net_mobility |>
+q1_plot_data <- net_mobility |>
   filter(abs(net_gain) >= 2) |>
   mutate(
     type = if_else(net_gain > 0, "Net Gain", "Net Loss"),
     country = fct_reorder(country, net_gain)
   )
 
-plot_data |>  ggplot(aes(x = net_gain, y = country, fill = type)) + 
+q1_plot_data |>  ggplot(aes(x = net_gain, y = country, fill = type)) + 
   geom_col() + 
   labs(
     title = "Net Scientific Migration in Physics & Chemistry",
@@ -249,6 +251,10 @@ plot_data |>  ggplot(aes(x = net_gain, y = country, fill = type)) +
 ```
 
 The analysis reveals an asymmetric geographic concentration of scientific talent in Physics and Chemistry. The United States is by far the largest net beneficiary of international scientific talent mobility. Historial nations such as Prussia and Austria-Hungary experienced the greatest net depletion of scientific talent, with contemporaries of Russia and China also demonstrating net losses.
+
+## Question 2
+
+### How has the average age of laureates at the time of their award changed over the decades in Physics compared to Chemistry?
 
 ```{r}
 #| label: question-2
@@ -277,12 +283,181 @@ age_trends <- laureates_tidy |>
 #| message: false
 #| warning: false
 
-age_summary_table <- age_by_decade |>
-  select(decade, category, mean_age) |>
-  pivot_wider(names_from = category, values_from = mean_age) |>
-  mutate(Difference_Chem_minus_Phys = round(Chemistry - Physics, 1))
+age_summary_table <- age_trends |>
+  select(decade, 
+         category, 
+         mean_age) |>
+  pivot_wider(names_from = category, 
+              values_from = mean_age) |>
+  mutate(difference_chem_minus_phys = round(Chemistry - Physics, 1))
 
-knitr::kable(summary_table, caption = "Net Mobility in Physics and Chemistry")
+knitr::kable(
+  age_summary_table, 
+  col.names = c("Decade", "Chemistry Mean Age", "Physics Mean Age", "Difference (Chem - Phys)"),
+  caption = "Decadal Mean Laureate Age at Award: Chemistry vs. Physics"
+)
+```
+
+```{r}
+
+annual_ages <- laureates_tidy |>
+  filter(!is.na(age_at_award)) |>
+  group_by(award_year, 
+           category) |>
+  summarize(mean_age = mean(age_at_award), 
+            .groups = "drop") |>
+  pivot_wider(names_from = category, 
+              values_from = mean_age)
+
+crossover_year <- annual_ages |>
+  filter(award_year >= 1990, Physics > Chemistry) |>
+  slice(1) |>
+  pull(award_year)
+
+crossover_year
+```
+
+Gemini was used to assist in adding shaded back panel to plot.
+
+```{r}
+#| label: question-2-plot
+#| echo: true
+#| message: false
+#| warning: false
+
+age_trends |> ggplot(aes(x = decade, 
+                         y = mean_age, 
+                         color = category, 
+                         group = category)) + 
+  annotate(
+    "rect",
+    xmin = -Inf,
+    xmax = crossover_year,
+    ymin = -Inf,
+    ymax = Inf,
+    fill = "gray90",
+    alpha = 0.5
+  ) +
+  
+  geom_vline(
+    xintercept = crossover_year, 
+    linetype = "dotted", 
+    color = "gray40", 
+    linewidth = 0.8
+  ) +
+  
+  annotate(
+    "text",
+    x = crossover_year - 2,
+    y = 48,
+    label = paste0("Pre-", crossover_year, ":\nChem older than Phys"),
+    hjust = 1,
+    size = 3.2,
+    color = "gray30",
+    fontface = "italic"
+  ) +
+  
+  geom_line(linewidth = 1.1) +
+  geom_point(size = 2.5) +
+  geom_smooth(method = "loess", 
+              se = FALSE, 
+              linetype = "dashed", 
+              alpha = 0.5) +
+  
+  labs(
+    title = "Average Age of Nobel Laureates at Time of Award (by Decade)",
+    caption = "data sourced from Nobel Prize API",
+    x = "Award Year (by decade)",
+    y = "Average Age at Award",
+    color = "Discipline"
+  ) +
+  
+  theme_standard() + 
+  
+  theme(
+    panel.grid.minor = element_blank()
+  )
+
+```
+
+Prior to 1991, Chemistry laureates were consistently older than physicists. After 1991, modern Physics overtook Chemistry in average recipient age.
+
+## Question 3
+
+### Which universities or research institutions have produced the most Nobel laureates across Physics and Chemistry?
+
+```{r}
+#| label: question-3
+#| echo: true
+#| message: false
+#| warning: false
+
+institution_counts <- laureates_tidy |>
+  filter(!is.na(affiliation_name)) |>
+  count(affiliation_name, 
+        category, 
+        name = "awards")
+
+top_institutions_overall <- institution_counts |>
+  group_by(affiliation_name) |>
+  summarize(total_awards = sum(awards), 
+            .groups = "drop") |>
+  slice_max(total_awards, 
+            n = 10, 
+            with_ties = FALSE)
+```
+
+```{r}
+#| label: question-3-summary
+#| echo: true
+#| message: false
+#| warning: false
+
+top_10_table <- institution_counts |>
+  semi_join(top_institutions_overall, 
+            by = "affiliation_name") |>
+  pivot_wider(names_from = category, 
+              values_from = awards, 
+              values_fill = 0) |>
+  mutate(Total = Chemistry + Physics) |>
+  arrange(desc(Total))
+
+knitr::kable(
+  top_10_table,
+  col.names = c("Institution", "Chemistry", "Physics", "Total Awards"),
+  caption = "Top 10 Research Institutions by Nobel Laureates in Physical Sciences"
+)
+```
+
+```{r}
+#| label: question-3-plot
+#| echo: true
+#| message: false
+#| warning: false
+
+q3_plot_data <- institution_counts |>
+  semi_join(top_institutions_overall, 
+            by = "affiliation_name") |>
+  mutate(affiliation_name = fct_reorder(affiliation_name, 
+                                        awards, 
+                                        .fun = sum))
+
+q3_plot_data |> ggplot(aes(x = awards, 
+                           y = affiliation_name, 
+                           fill = category)) +
+  geom_col() +
+  
+  labs(
+    title = "Top 10 Institutional Hubs: Physics & Chemistry",
+    caption = "data sourced from Nobel Prize API",
+    x = "Number of Laureates",
+    y = NULL,
+    fill = "Discipline"
+  ) +
+  theme_standard() +
+  theme(
+    panel.grid.minor = element_blank()
+  )
 ```
 
 # Findings and Recommendations
