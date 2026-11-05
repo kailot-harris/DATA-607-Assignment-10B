@@ -460,6 +460,45 @@ q3_plot_data |> ggplot(aes(x = awards,
   )
 ```
 
+A small cluster of elite universities (led by University of California, Stanford, and Harvard) dominates both disciplines, with UC leading both Chemistry and Physics.
+
+## Question 4
+
+### Does the distribution of birth months among Physics and Chemistry laureates show evidence of a "relative age effect"?
+
+```{r}
+#| label: question-4
+#| echo: true
+#| message: false
+#| warning: false
+
+monthly_births <- laureates_tidy |>
+  filter(!is.na(birth_month)) |>
+  count(birth_month, 
+        category, 
+        name = "count")
+
+monthly_totals <- monthly_births |>
+  group_by(birth_month) |>
+  summarize(total = sum(count), 
+            .groups = "drop") |>
+  mutate(
+    observed_pct = round((total / sum(total)) * 100, 1),
+    expected_pct = round(100 / 12, 1),
+    difference = round(observed_pct - expected_pct,1)
+  )
+
+chisq_res <- chisq.test(monthly_totals$total)
+
+chisq_res
+
+knitr::kable(
+  monthly_totals,
+  col.names = c("Month", "Total Laureates", "Observed %", "Expected % (Uniform)", "Difference %"),
+  caption = "Birth Month Distribution of Physical Sciences Laureates"
+)
+```
+
 # Findings and Recommendations
 
 To extend this work, a data set that tracks national population estimates over time could be leveraged to normalize some of these approaches.
