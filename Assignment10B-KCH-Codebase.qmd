@@ -94,6 +94,10 @@ get_nobel_data <- function(file = "laureates.rds") {
 }
 ```
 
+Data is ingested from the Nobel Prize Developer Zone API using an HTTP request. The API restricts output to 25 items by default, so a limit parameter of 1,000 was added to the query URL to retrieve all historical laureates in a single pull.
+
+To prevent repeated calls to the live API during rendering, a function was built using `tryCatch()` to cache the data locally. Initially, saving the parsed JSON payload directly to an Apache Parquet file caused an error because the list-columns inside the raw data frame were too deeply nested for Parquet's schema. This was resolved by saving the object as a local `.rds` file using `saveRDS()`. On subsequent runs, the function checks for the presence of this file and loads it directly from disk.
+
 ```{r}
 #| label: get-data
 #| echo: true
@@ -109,13 +113,13 @@ ncol(laureates_raw)
 
 ## Data tidying and unnesting
 
-In the Nobel Prize API, institutional affiliations are stored as nested list-columns. An individual award record may contain a single affiliated institution, multiple concurrent institutions, or none at all (represented as an empty or missing data frame).
-
-Directly unnesting this column causes indexing errors and row-multiplication issues. To resolve this, `purrr::map_chr()` iterates row-by-row through the list-column using defensive validation logic.
-
-This approach flattens the nested structures into consistent, vector-safe character strings while preserving the one-row-per-award observation granularity required for tidy analysis.
+The raw JSON data contains nested data frames and list-columns that must be flattened before analysis. The data was first cleaned by extracting the English text fields and unnesting the `nobelPrizes` column, then filtering solely for prizes awarded in Physics and Chemistry.
 
 ```{r}
+#| label: clean-data
+#| echo: true
+#| message: false
+#| warning: false
 
 laureates_clean <- laureates_raw |> 
   mutate(id = id,
@@ -137,13 +141,17 @@ laureates_clean <- laureates_raw |>
     .keep = "none"
   ) |>
   filter(category %in% c("Physics", "Chemistry"))
-  
-
 ```
 
-Using date parsing and regex, birth dates are transformed into chronological `age_at_award`, award `decade`, and ordered `birth_month` factors while preserving missing records.
+Handling the `affiliations` column presented a challenge: some laureates had no recorded institution, while others had multiple appointments across different universities. Unnesting this column directly caused row duplication and indexing errors. To fix this, `purrr::map_chr()` was used to check whether each row was a valid data frame with a name column before pulling the primary English name. If no valid affiliation existed, the function safely returned `NA_character_`.
+
+Next, date metrics were derived. When using `lubridate::ymd()` to parse birth dates, a warning was generated because 11 historical records only contained birth years rather than full dates. To eliminate this warning without dropping rows, base R's `format(as.Date(birth_date), "%b")` was used to extract birth months, and the resulting vector was converted to an ordered factor using `month.abb`. Finally, each laureate's age at the time of their award and the award decade were computed.
 
 ```{r}
+#| label: tidy-data
+#| echo: true
+#| message: false
+#| warning: false
 
 laureates_tidy <- laureates_clean |> 
   mutate(
@@ -172,6 +180,8 @@ laureates_tidy <- laureates_clean |>
 ## Question 1
 
 ### Which countries have experienced the largest net "brain drain" versus "brain gain" among Physics and Chemistry laureates?
+
+Scientific migration was measured by comparing each laureate's birth country against their affiliated country at the time of the award. Only laureates whose birth country differed from their affiliation country were evaluated. Emigration counts ("brain drain") and immigration counts ("brain gain") were calculated and joined together to find the net balance for each country.
 
 ```{r}
 #| label: question-1
@@ -223,6 +233,27 @@ knitr::kable(mobility_summary_table, caption = "Net Mobility in Physics and Chem
 ```
 
 ```{r}
+#| label: std-theme
+#| echo:  false
+#| warning:  false
+#| message:  false
+
+theme_standard <- function(){
+  theme_minimal() +
+    theme(
+      plot.title.position = "plot",
+      plot.caption.position = "plot",
+      plot.title = element_text(size = 15, face = "bold"),
+      plot.subtitle = element_text(size = 13, face = "italic"),
+      axis.text.y = element_text(size = 11, face = "bold"),
+      axis.text.x = element_text(size = 11, face = "bold"),
+      axis.title.y = element_text(size = 12, face = "bold"),
+      axis.title.x = element_text(size = 12, face = "bold")
+    )
+}
+```
+
+```{r}
 #| label: question-1-plot
 #| echo: true
 #| message: false
@@ -250,11 +281,13 @@ q1_plot_data |>  ggplot(aes(x = net_gain, y = country, fill = type)) +
   )
 ```
 
-The analysis reveals an asymmetric geographic concentration of scientific talent in Physics and Chemistry. The United States is by far the largest net beneficiary of international scientific talent mobility. Historial nations such as Prussia and Austria-Hungary experienced the greatest net depletion of scientific talent, with contemporaries of Russia and China also demonstrating net losses.
+The analysis reveals a heavy concentration of talent flowing toward the United States, which had a net gain of 63 laureates. Conversely, historical territories like Prussia (-9) and Austria-Hungary (-8) experienced the greatest net losses. Modern nations such as China (-6) and the Netherlands (-5) also exhibited net losses of laureates to institutions abroad.
 
 ## Question 2
 
 ### How has the average age of laureates at the time of their award changed over the decades in Physics compared to Chemistry?
+
+To assess whether the timeline between discovery and recognition has lengthened over time, the average age of laureates was grouped by award decade and discipline.
 
 ```{r}
 #| label: question-2
@@ -298,6 +331,8 @@ knitr::kable(
 )
 ```
 
+A key challenge was identifying the exact inflection point where Physics laureates became older on average than Chemistry laureates. By pivoting annual mean ages wider and filtering for years where Physics exceeded Chemistry, the precise crossover year was determined to be 1991.
+
 ```{r}
 
 annual_ages <- laureates_tidy |>
@@ -317,7 +352,7 @@ crossover_year <- annual_ages |>
 crossover_year
 ```
 
-Gemini was used to assist in adding shaded back panel to plot.
+A shaded rectangle was added to the background of the plot using `annotate("rect", ...)` to visually separate the pre-1991 period from the modern era.
 
 ```{r}
 #| label: question-2-plot
@@ -380,11 +415,13 @@ age_trends |> ggplot(aes(x = decade,
 
 ```
 
-Prior to 1991, Chemistry laureates were consistently older than physicists. After 1991, modern Physics overtook Chemistry in average recipient age.
+Prior to 1991, Chemistry laureates were consistently older than physicists. After 1991, Physics overtook Chemistry in average recipient age.
 
 ## Question 3
 
 ### Which universities or research institutions have produced the most Nobel laureates across Physics and Chemistry?
+
+Institutional affiliations were aggregated to determine which universities and research facilities have produced the highest volume of Nobel laureates across Physics and Chemistry. Laureates without institutional affiliations were filtered out, and the total counts for the top 10 institutions were calculated.
 
 ```{r}
 #| label: question-3
@@ -460,11 +497,13 @@ q3_plot_data |> ggplot(aes(x = awards,
   )
 ```
 
-A small cluster of elite universities (led by University of California, Stanford, and Harvard) dominates both disciplines, with UC leading both Chemistry and Physics.
+The top 10 institutions are dominated by American and British universities. The University of California system produced the most laureates overall (27 total), showing a balanced distribution between Chemistry (14) and Physics (13). Other institutions showed strong specialization: Stanford, Harvard, and Princeton produced primarily Physics laureates, while the MRC Laboratory of Molecular Biology in Cambridge produced 8 Chemistry laureates and zero in Physics.
 
 ## Question 4
 
 ### Does the distribution of birth months among Physics and Chemistry laureates show evidence of a "relative age effect"?
+
+To test whether a "relative age effect" exists among top physical scientists, birth month frequencies were tallied across the calendar year. The observed percentage of births per month was compared against a theoretical uniform distribution of approximately 8.33% (or roughly 34.3 laureates per month).
 
 ```{r}
 #| label: question-4
@@ -488,10 +527,6 @@ monthly_totals <- monthly_births |>
     difference = round(observed_pct - expected_pct,1)
   )
 
-chisq_res <- chisq.test(monthly_totals$total)
-
-chisq_res
-
 knitr::kable(
   monthly_totals,
   col.names = c("Month", "Total Laureates", "Observed %", "Expected % (Uniform)", "Difference %"),
@@ -499,9 +534,136 @@ knitr::kable(
 )
 ```
 
+```{r}
+#| label: question-4-plot
+#| echo: true
+#| message: false
+#| warning: false
+
+expected_per_month <- sum(monthly_births$count) / 12
+
+chisq_res <- chisq.test(monthly_totals$total)
+
+chisq_res
+
+monthly_births |> ggplot(aes(x = birth_month, 
+                             y = count, 
+                             fill = category)) +
+  geom_col() +
+  geom_hline(
+    yintercept = expected_per_month,
+    linetype = "dashed",
+    color = "#404040",
+    linewidth = 0.8
+  ) +
+  annotate(
+    "text",
+    x = 11.0,
+    y = expected_per_month + 1.2,
+    label = "Expected Uniform Mean",
+    color = "#404040",
+    size = 3.2,
+    fontface = "italic"
+  ) +
+  labs(
+    title = "Birth Month Distribution: Physics & Chemistry Laureates",
+    caption = "data sourced from Nobel Prize API",
+    x = "Birth Month",
+    y = "Number of Laureates",
+    fill = "Discipline"
+  )
+```
+
+The birth month distribution remained relatively uniform, ranging from a low of 27 laureates in November to a high of 43 in September. A Chi-square goodness-of-fit test was conducted on the monthly totals, yielding \tex($\chi^2 = 8.07, p = 0.71$). Because the p-value is well above the 0.05 threshold, the null hypothesis is not rejected, confirming that birth month does not have a statistically significant relationship with winning a Nobel Prize in Physics or Chemistry.
+
+## Question 5
+
+### Which individuals have won multiple Nobel prizes in Physics or Chemistry (or crossed between both), and what was the time gap between their awards?
+
+Repeat winners were identified by grouping the tidy data set by laureate ID and name and filtering for individuals with more than one award. The time gap between prizes was calculated by taking the difference between the maximum and minimum award years.
+
+```{r}
+#| label: question-5
+#| echo: true
+#| message: false
+#| warning: false
+
+repeat_laureates <- laureates_tidy |>
+  group_by(id, 
+           known_name) |>
+  filter(n() > 1) |>
+  arrange(award_year, 
+          .by_group = TRUE) |>
+  summarize(
+    prizes_count = n(),
+    categories = paste(category, 
+                       collapse = " & "),
+    years = paste(award_year, 
+                  collapse = ", "),
+    gap_years = max(award_year) - min(award_year),
+    first_affiliation = first(affiliation_name),
+    second_affiliation = last(affiliation_name),
+    .groups = "drop"
+  ) |>
+  arrange(desc(prizes_count), 
+          gap_years)
+
+knitr::kable(
+  repeat_laureates |> 
+    select(
+      Laureate = known_name,
+      `Prizes Won` = prizes_count,
+      `Discipline(s)` = categories,
+      `Years Awarded` = years,
+      `Gap (Years)` = gap_years
+    ),
+  caption = "Repeat and Cross-Disciplinary Laureates in Physics and Chemistry"
+)
+```
+
+```{r}
+#| label: question-5-plot
+#| echo: true
+#| message: false
+#| warning: false
+
+p5_data <- laureates_tidy |>
+  semi_join(repeat_laureates, by = "id") |>
+  arrange(known_name, award_year)
+
+p5_data |> ggplot(aes(x = award_year, 
+                      y = fct_reorder(known_name, 
+                                      award_year, 
+                                      min))) +
+  geom_line(aes(group = known_name), 
+            color = "gray60",
+            linewidth = 1.2) +
+  geom_point(aes(color = category), 
+             size = 4) +
+  geom_text(aes(label = award_year),
+            vjust = -1.2,
+            hjust = 0.5,
+            size = 3.3, 
+            fontface = "bold") +
+  labs(
+    title = "Marie Curie is the Only Multi-Discipline Awardee",
+    caption = "data sourced from Nobel Prize API",
+    x = "Award Year",
+    y = NULL,
+    color = "Discipline"
+  ) +
+  theme_standard()
+```
+
+Only four individuals have ever won multiple Nobel prizes in the physical sciences. Of these four, Marie Curie is the only laureate to cross disciplines, winning in Physics in 1903 and Chemistry in 1911 with an 8-year gap. The remaining three individuals repeated within their specific fields: John Bardeen won two Physics prizes across a 16-year gap, while Frederick Sanger and K. Barry Sharpless each won two Chemistry prizes across gaps of 22 and 21 years, respectively.
+
 # Findings and Recommendations
 
-To extend this work, a data set that tracks national population estimates over time could be leveraged to normalize some of these approaches.
+This analysis demonstrates the process of pulling semi-structured JSON data from a REST API, flattening complex list-columns, and conducting comparative analysis across Physics and Chemistry.
+
+Overall, the data shows that physical science Nobel prizes have historically concentrated in American and British institutions, with the United States serving as the primary beneficiary of international scientific migration. Additionally, the average age of recipients has increased significantly over the last century, with Physics overtaking Chemistry in average recipient age after 1991. Finally, while multiple awards are extremely rare and achieved by only four individuals, calendar birth month has no significant impact on Nobel-level achievement.
+
+To extend this work, historical population data could be joined to normalize migration figures on a per-capita basis, testing whether smaller nations like Switzerland or the Netherlands produce more laureates relative to their population size. Furthermore, incorporating the prize amount data from the API could allow for an analysis of inflation-adjusted prize winnings across disciplines over time.
 
 # Cited Works
 
