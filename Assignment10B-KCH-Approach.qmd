@@ -1,0 +1,30 @@
+---
+title: "Assignment10B-KCH-Approach"
+author: "Kailot C. Harris"
+date: "2026/11/03"
+format:
+  html:
+    toc: true
+    code-fold: true
+    code-overflow: wrap
+editor: visual
+theme:
+  dark: darkly
+  light: flatly
+---
+
+# Introduction and Overview
+
+In this assignment, 
+
+# Approach
+
+1.  
+
+2.
+
+3.
+
+4.
+
+5.
