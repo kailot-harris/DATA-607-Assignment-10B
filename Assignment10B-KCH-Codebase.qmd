@@ -258,6 +258,7 @@ theme_standard <- function(){
 #| echo: true
 #| message: false
 #| warning: false
+#| fig-cap: 'The United States is the Primary Destination for Migrating Laureates"
 
 q1_plot_data <- net_mobility |>
   filter(abs(net_gain) >= 2) |>
@@ -269,7 +270,7 @@ q1_plot_data <- net_mobility |>
 q1_plot_data |>  ggplot(aes(x = net_gain, y = country, fill = type)) + 
   geom_col() + 
   labs(
-    title = "Net Scientific Migration in Physics & Chemistry",
+    title = "The United States is the Primary Destination for Migrating Laureates",
     caption = "data sourced from Nobel Prize API",
     x = "Net Laureate Balance (Immigrated - Emigrated)",
     y = NULL,
@@ -359,6 +360,7 @@ A shaded rectangle was added to the background of the plot using `annotate("rect
 #| echo: true
 #| message: false
 #| warning: false
+#| fig-cap: "Physics Laureates Surpassed Chemistry in Average Age After 1991"
 
 age_trends |> ggplot(aes(x = decade, 
                          y = mean_age, 
@@ -400,7 +402,7 @@ age_trends |> ggplot(aes(x = decade,
               alpha = 0.5) +
   
   labs(
-    title = "Average Age of Nobel Laureates at Time of Award (by Decade)",
+    title = "Physics Laureates Surpassed Chemistry in Average Age After 1991",
     caption = "data sourced from Nobel Prize API",
     x = "Award Year (by decade)",
     y = "Average Age at Award",
@@ -471,6 +473,7 @@ knitr::kable(
 #| echo: true
 #| message: false
 #| warning: false
+#| fig-cap: "University of California Leads Overall Physical Science Awards"
 
 q3_plot_data <- institution_counts |>
   semi_join(top_institutions_overall, 
@@ -485,7 +488,7 @@ q3_plot_data |> ggplot(aes(x = awards,
   geom_col() +
   
   labs(
-    title = "Top 10 Institutional Hubs: Physics & Chemistry",
+    title = "University of California Leads Overall Physical Science Awards",
     caption = "data sourced from Nobel Prize API",
     x = "Number of Laureates",
     y = NULL,
