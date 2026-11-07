@@ -258,7 +258,7 @@ theme_standard <- function(){
 #| echo: true
 #| message: false
 #| warning: false
-#| fig-cap: 'The United States is the Primary Destination for Migrating Laureates"
+#| fig-cap: "The United States is the Primary Destination for Migrating Laureates"
 
 q1_plot_data <- net_mobility |>
   filter(abs(net_gain) >= 2) |>
