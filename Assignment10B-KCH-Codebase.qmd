@@ -20,7 +20,7 @@ In this assignment, structured web data acquisition and JSON data reshaping are 
 
 Using the Version 2.1 REST API, laureate records across Physics and Chemistry are ingested. The raw data are parsed from hierarchical, nested JSON documents into rectangular, tidy data frames using the `jsonlite` [@jsonlite] and `tidyverse` [@tidyverse] ecosystems.
 
-Beyond standard frequency counts, this study investigates five data-driven questions examinining scientific migration ("brain drain"), age distributions at time of recognition, institutional concentration of awards, seasonal birth distributions, and repeat prize winners.
+Beyond standard frequency counts, this study investigates five data-driven questions examining scientific migration ("brain drain"), age distributions at time of recognition, institutional concentration of awards, seasonal birth distributions, and repeat prize winners.
 
 # Approach
 
@@ -74,7 +74,7 @@ get_nobel_data <- function(file = "laureates.rds") {
     return(readRDS(file))
   }
   
-  url <- "https://api.nobelprize.org/2.1/laureates?limit=1000"
+  url <- "https://api.nobelprize.org/2.1/laureates?limit=1400"
   
   data <- tryCatch(
     {
@@ -227,6 +227,22 @@ mobility_summary_table <- bind_rows(
          Emigrated = emigrated, 
          `Net Gain` = net_gain)
 
+us_net    <- net_mobility |> 
+  filter(country == "USA") |> 
+  pull(net_gain)
+prussia   <- net_mobility |> 
+  filter(country == "Prussia") |> 
+  pull(net_gain)
+austria_h <- net_mobility |> 
+  filter(country == "Austria-Hungary") |> 
+  pull(net_gain)
+china_net <- net_mobility |> 
+  filter(country == "China") |> 
+  pull(net_gain)
+neth_net  <- net_mobility |> 
+  filter(country == "the Netherlands") |> 
+  pull(net_gain)
+
 knitr::kable(mobility_summary_table, caption = "Net Mobility in Physics and Chemistry")
 ```
 
@@ -280,7 +296,7 @@ q1_plot_data |>  ggplot(aes(x = net_gain, y = country, fill = type)) +
   )
 ```
 
-The analysis reveals a heavy concentration of talent flowing toward the United States, which had a net gain of 63 laureates. Conversely, historical territories like Prussia (-9) and Austria-Hungary (-8) experienced the greatest net losses. Modern nations such as China (-6) and the Netherlands (-5) also exhibited net losses of laureates to institutions abroad.
+The analysis reveals a heavy concentration of talent flowing toward the United States, which had a net gain of `r us_net` laureates. Conversely, historical territories like Prussia (`r prussia`) and Austria-Hungary (`r austria_h`) experienced the greatest net losses. Modern nations such as China (`r china_net`) and the Netherlands (`r neth_net`) also exhibited net losses of laureates to institutions abroad.
 
 ## Question 2
 
@@ -330,8 +346,6 @@ knitr::kable(
 )
 ```
 
-A key challenge was identifying the exact inflection point where Physics laureates became older on average than Chemistry laureates. By pivoting annual mean ages wider and filtering for years where Physics exceeded Chemistry, the precise crossover year was determined to be 1991.
-
 ```{r}
 
 annual_ages <- laureates_tidy |>
@@ -343,6 +357,13 @@ annual_ages <- laureates_tidy |>
   pivot_wider(names_from = category, 
               values_from = mean_age)
 
+phys_2020s <- age_trends |> 
+  filter(decade == 2020, category == "Physics") |> 
+  pull(mean_age)
+chem_2020s <- age_trends |> 
+  filter(decade == 2020, category == "Chemistry") |> 
+  pull(mean_age)
+
 crossover_year <- annual_ages |>
   filter(award_year >= 1990, Physics > Chemistry) |>
   slice(1) |>
@@ -350,6 +371,8 @@ crossover_year <- annual_ages |>
 
 crossover_year
 ```
+
+A key challenge was identifying the exact inflection point where Physics laureates became older on average than Chemistry laureates. By pivoting annual mean ages wider and filtering for years where Physics exceeded Chemistry, the precise crossover year was determined to be `r crossover_year`.
 
 A shaded rectangle was added to the background of the plot using `annotate("rect", ...)` to visually separate the pre-1991 period from the modern era.
 
@@ -412,7 +435,7 @@ age_trends |> ggplot(aes(x = decade,
 
 ```
 
-Prior to 1991, Chemistry laureates were consistently older than physicists. After 1991, Physics overtook Chemistry in average recipient age.
+Prior to `r crossover_year`, Chemistry laureates were consistently older than physicists. After `r crossover_year`, Physics overtook Chemistry in average recipient age, climbing to an average of `r phys_2020s` years in the 2020s compared to `r chem_2020s` years for Chemistry.
 
 ## Question 3
 
@@ -456,6 +479,19 @@ top_10_table <- institution_counts |>
   mutate(Total = Chemistry + Physics) |>
   arrange(desc(Total))
 
+uc_total <- top_10_table |> 
+  filter(str_detect(affiliation_name, "University of California")) |> 
+  pull(Total)
+uc_chem  <- top_10_table |> 
+  filter(str_detect(affiliation_name, "University of California")) |> 
+  pull(Chemistry)
+uc_phys  <- top_10_table |> 
+  filter(str_detect(affiliation_name, "University of California")) |> 
+  pull(Physics)
+mrc_chem <- top_10_table |> 
+  filter(str_detect(affiliation_name, "MRC Laboratory")) |> 
+  pull(Chemistry)
+
 knitr::kable(
   top_10_table,
   col.names = c("Institution", "Chemistry", "Physics", "Total Awards"),
@@ -495,7 +531,7 @@ q3_plot_data |> ggplot(aes(x = awards,
   )
 ```
 
-The top 10 institutions are dominated by American and British universities. The University of California system produced the most laureates overall (27 total), showing a balanced distribution between Chemistry (14) and Physics (13). Other institutions showed strong specialization: Stanford, Harvard, and Princeton produced primarily Physics laureates, while the MRC Laboratory of Molecular Biology in Cambridge produced 8 Chemistry laureates and zero in Physics.
+The top 10 institutions are dominated by American and British universities. The University of California system produced the most laureates overall (`r uc_total` total), showing a balanced distribution between Chemistry (`r uc_chem`) and Physics (`r uc_phys`). Other institutions showed strong specialization: Stanford, Harvard, and Princeton produced primarily Physics laureates, while the MRC Laboratory of Molecular Biology in Cambridge produced `r mrc_chem` Chemistry laureates and zero in Physics.
 
 ## Question 4
 
@@ -537,7 +573,7 @@ knitr::kable(
 #| echo: true
 #| message: false
 #| warning: false
-#| fig-cap: "Birth Month Distribution: Physics & Chemistry Laureates"
+#| fig-cap: "Birth Month Shows No Evidence of a Relative Age Effect"
 
 expected_per_month <- sum(monthly_births$count) / 12
 
@@ -561,7 +597,7 @@ monthly_births |> ggplot(aes(x = birth_month,
     fontface = "italic"
   ) +
   labs(
-    title = "Birth Month Distribution: Physics & Chemistry Laureates",
+    title = "Birth Month Shows No Evidence of a Relative Age Effect",
     caption = "data sourced from Nobel Prize API",
     x = "Birth Month",
     y = "Number of Laureates",
@@ -583,10 +619,15 @@ chisq_table <- broom::tidy(chisq_res) |>
          `dof` = parameter,
          `method` = method)
 
+min_month  <- monthly_totals |> slice_min(total, n = 1)
+max_month  <- monthly_totals |> slice_max(total, n = 1)
+chi_stat   <- round(chisq_res$statistic, 2)
+chi_pval   <- round(chisq_res$p.value, 2)
+
 knitr::kable(chisq_table, caption = "Goodness-of-Fit Test for Monthly Birth Uniformity")
 ```
 
-The birth month distribution remained relatively uniform, ranging from a low of 27 laureates in November to a high of 43 in September. A Chi-square goodness-of-fit test was conducted on the monthly totals, yielding \tex($\chi^2 = 8.07, p = 0.71$). Because the p-value is well above the 0.05 threshold, the null hypothesis is not rejected, confirming that birth month does not have a statistically significant relationship with winning a Nobel Prize in Physics or Chemistry.
+The birth month distribution remained relatively uniform, ranging from a low of 27 `r min_month$total` laureates in `r min_month$birth_month` to a high of `r max_month$total` in `r max_month$birth_month`. A Chi-square goodness-of-fit test was conducted on the monthly totals, yielding ($\chi^2 = `r chi_stat`, p = `r chi_pval`$). Because the p-value is well above the 0.05 threshold, the null hypothesis is not rejected, confirming that birth month does not have a statistically significant relationship with winning a Nobel Prize in Physics or Chemistry.
 
 ## Question 5
 
@@ -620,6 +661,11 @@ repeat_laureates <- laureates_tidy |>
   arrange(desc(prizes_count), 
           gap_years)
 
+n_repeat <- nrow(repeat_laureates)
+curie_gap <- repeat_laureates |> 
+  filter(known_name == "Marie Curie") |> 
+  pull(gap_years)
+
 knitr::kable(
   repeat_laureates |> 
     select(
@@ -651,7 +697,6 @@ p5_data |> ggplot(aes(x = award_year,
                                       award_year, 
                                       min))) +
   geom_line(aes(group = known_name), 
-            color = "gray60",
             linewidth = 1.2) +
   geom_point(aes(color = category), 
              size = 4) +
@@ -670,7 +715,7 @@ p5_data |> ggplot(aes(x = award_year,
   theme_standard()
 ```
 
-Only four individuals have ever won multiple Nobel prizes in the physical sciences. Of these four, Marie Curie is the only laureate to cross disciplines, winning in Physics in 1903 and Chemistry in 1911 with an 8-year gap. The remaining three individuals repeated within their specific fields: John Bardeen won two Physics prizes across a 16-year gap, while Frederick Sanger and K. Barry Sharpless each won two Chemistry prizes across gaps of 22 and 21 years, respectively.
+Only `r n_repeat` individuals have ever won multiple Nobel prizes in the physical sciences. Of these `r n_repeat`, Marie Curie is the only laureate to cross disciplines, winning in Physics in 1903 and Chemistry in 1911 with an `r curie_gap`-year gap. The remaining three individuals repeated within their specific fields: John Bardeen won two Physics prizes across a 16-year gap, while Frederick Sanger and K. Barry Sharpless each won two Chemistry prizes across gaps of 22 and 21 years, respectively.
 
 # Findings and Recommendations
 
@@ -680,11 +725,11 @@ Overall, the data shows that physical science Nobel prizes have historically con
 
 To extend this work, historical population data could be joined to normalize migration figures on a per-capita basis, testing whether smaller nations like Switzerland or the Netherlands produce more laureates relative to their population size. Furthermore, incorporating the prize amount data from the API could allow for an analysis of inflation-adjusted prize winnings across disciplines over time.
 
+### Generative AI Usage
+
+Generative artificial intelligence was consulted during the development of this pipeline. Specifically, Gemini 3.8 Flash via the Google web interface was utilized for constructing defensive data extraction patterns with `purrr::map_chr()`, troubleshooting date parsing logic, and assisting with the `annotate("rect", ...)` background shading logic.
+
 # Cited Works
 
 ::: {#refs}
 :::
-
-### Generative AI Usage
-
-Generative artificial intelligence was consulted during the development of this pipeline. Specifically, Gemini 3.8 Flash \[\@google_gemini_2026\] via the Google web interface was utilized for constructing defensive data extraction patterns with `purrr::map_chr()`, troubleshooting date parsing logic, and assisting with the `annotate("rect", ...)` background shading logic.

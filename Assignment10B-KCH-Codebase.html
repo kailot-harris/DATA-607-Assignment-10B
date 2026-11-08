@@ -326,11 +326,11 @@ window.Quarto = {
   <li><a href="#which-individuals-have-won-multiple-nobel-prizes-in-physics-or-chemistry-or-crossed-between-both-and-what-was-the-time-gap-between-their-awards" id="toc-which-individuals-have-won-multiple-nobel-prizes-in-physics-or-chemistry-or-crossed-between-both-and-what-was-the-time-gap-between-their-awards" class="nav-link" data-scroll-target="#which-individuals-have-won-multiple-nobel-prizes-in-physics-or-chemistry-or-crossed-between-both-and-what-was-the-time-gap-between-their-awards">Which individuals have won multiple Nobel prizes in Physics or Chemistry (or crossed between both), and what was the time gap between their awards?</a></li>
   </ul></li>
   </ul></li>
-  <li><a href="#findings-and-recommendations" id="toc-findings-and-recommendations" class="nav-link" data-scroll-target="#findings-and-recommendations">Findings and Recommendations</a></li>
-  <li><a href="#cited-works" id="toc-cited-works" class="nav-link" data-scroll-target="#cited-works">Cited Works</a>
+  <li><a href="#findings-and-recommendations" id="toc-findings-and-recommendations" class="nav-link" data-scroll-target="#findings-and-recommendations">Findings and Recommendations</a>
   <ul class="collapse">
   <li><a href="#generative-ai-usage" id="toc-generative-ai-usage" class="nav-link" data-scroll-target="#generative-ai-usage">Generative AI Usage</a></li>
   </ul></li>
+  <li><a href="#cited-works" id="toc-cited-works" class="nav-link" data-scroll-target="#cited-works">Cited Works</a></li>
   </ul>
 </nav>
 </div>
@@ -372,7 +372,7 @@ window.Quarto = {
 <h1>Introduction and Overview</h1>
 <p>In this assignment, structured web data acquisition and JSON data reshaping are applied to analyze scientific history via the <a href="https://www.nobelprize.org/about/developer-zone-2/">Nobel Prize Developer Zone API</a> <span class="citation" data-cites="nobelprizeAPI">(<a href="#ref-nobelprizeAPI" role="doc-biblioref">Nobel Prize Outreach AB 2026</a>)</span>.</p>
 <p>Using the Version 2.1 REST API, laureate records across Physics and Chemistry are ingested. The raw data are parsed from hierarchical, nested JSON documents into rectangular, tidy data frames using the <code>jsonlite</code> <span class="citation" data-cites="jsonlite">(<a href="#ref-jsonlite" role="doc-biblioref">Ooms 2023</a>)</span> and <code>tidyverse</code> <span class="citation" data-cites="tidyverse">(<a href="#ref-tidyverse" role="doc-biblioref">Wickham et al. 2019</a>)</span> ecosystems.</p>
-<p>Beyond standard frequency counts, this study investigates five data-driven questions examinining scientific migration (“brain drain”), age distributions at time of recognition, institutional concentration of awards, seasonal birth distributions, and repeat prize winners.</p>
+<p>Beyond standard frequency counts, this study investigates five data-driven questions examining scientific migration (“brain drain”), age distributions at time of recognition, institutional concentration of awards, seasonal birth distributions, and repeat prize winners.</p>
 </section>
 <section id="approach" class="level1">
 <h1>Approach</h1>
@@ -416,7 +416,7 @@ window.Quarto = {
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="fu">readRDS</span>(file))</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  }</span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  url <span class="ot">&lt;-</span> <span class="st">"https://api.nobelprize.org/2.1/laureates?limit=1000"</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  url <span class="ot">&lt;-</span> <span class="st">"https://api.nobelprize.org/2.1/laureates?limit=1400"</span></span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  </span>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  data <span class="ot">&lt;-</span> <span class="fu">tryCatch</span>(</span>
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    {</span>
@@ -444,7 +444,7 @@ window.Quarto = {
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(laureates_raw)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 1000</code></pre>
+<pre><code>[1] 1028</code></pre>
 </div>
 <details class="code-fold">
 <summary>Code</summary>
@@ -558,7 +558,23 @@ window.Quarto = {
 <span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>         <span class="at">Emigrated =</span> emigrated, </span>
 <span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>         <span class="st">`</span><span class="at">Net Gain</span><span class="st">`</span> <span class="ot">=</span> net_gain)</span>
 <span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(mobility_summary_table, <span class="at">caption =</span> <span class="st">"Net Mobility in Physics and Chemistry"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>us_net    <span class="ot">&lt;-</span> net_mobility <span class="sc">|&gt;</span> </span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(country <span class="sc">==</span> <span class="st">"USA"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(net_gain)</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>prussia   <span class="ot">&lt;-</span> net_mobility <span class="sc">|&gt;</span> </span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(country <span class="sc">==</span> <span class="st">"Prussia"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(net_gain)</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>austria_h <span class="ot">&lt;-</span> net_mobility <span class="sc">|&gt;</span> </span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(country <span class="sc">==</span> <span class="st">"Austria-Hungary"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(net_gain)</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>china_net <span class="ot">&lt;-</span> net_mobility <span class="sc">|&gt;</span> </span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(country <span class="sc">==</span> <span class="st">"China"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(net_gain)</span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>neth_net  <span class="ot">&lt;-</span> net_mobility <span class="sc">|&gt;</span> </span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(country <span class="sc">==</span> <span class="st">"the Netherlands"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(net_gain)</span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(mobility_summary_table, <span class="at">caption =</span> <span class="st">"Net Mobility in Physics and Chemistry"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
@@ -576,9 +592,9 @@ window.Quarto = {
 <tr class="odd">
 <td style="text-align: left;">Top Net Gainers</td>
 <td style="text-align: left;">USA</td>
-<td style="text-align: right;">66</td>
+<td style="text-align: right;">70</td>
 <td style="text-align: right;">3</td>
-<td style="text-align: right;">63</td>
+<td style="text-align: right;">67</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Top Net Gainers</td>
@@ -596,17 +612,17 @@ window.Quarto = {
 </tr>
 <tr class="even">
 <td style="text-align: left;">Top Net Gainers</td>
-<td style="text-align: left;">USSR</td>
-<td style="text-align: right;">7</td>
-<td style="text-align: right;">2</td>
-<td style="text-align: right;">5</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Top Net Gainers</td>
 <td style="text-align: left;">United Kingdom</td>
 <td style="text-align: right;">19</td>
 <td style="text-align: right;">14</td>
 <td style="text-align: right;">5</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Top Net Gainers</td>
+<td style="text-align: left;">Israel</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">4</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Top Net Losers</td>
@@ -625,9 +641,9 @@ window.Quarto = {
 <tr class="even">
 <td style="text-align: left;">Top Net Losers</td>
 <td style="text-align: left;">Russia</td>
-<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
 <td style="text-align: right;">8</td>
-<td style="text-align: right;">-8</td>
+<td style="text-align: right;">-7</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Top Net Losers</td>
@@ -638,10 +654,10 @@ window.Quarto = {
 </tr>
 <tr class="even">
 <td style="text-align: left;">Top Net Losers</td>
-<td style="text-align: left;">the Netherlands</td>
+<td style="text-align: left;">Japan</td>
 <td style="text-align: right;">0</td>
-<td style="text-align: right;">5</td>
-<td style="text-align: right;">-5</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">-6</td>
 </tr>
 </tbody>
 </table>
@@ -680,7 +696,7 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<p>The analysis reveals a heavy concentration of talent flowing toward the United States, which had a net gain of 63 laureates. Conversely, historical territories like Prussia (-9) and Austria-Hungary (-8) experienced the greatest net losses. Modern nations such as China (-6) and the Netherlands (-5) also exhibited net losses of laureates to institutions abroad.</p>
+<p>The analysis reveals a heavy concentration of talent flowing toward the United States, which had a net gain of 67 laureates. Conversely, historical territories like Prussia (-9) and Austria-Hungary (-8) experienced the greatest net losses. Modern nations such as China (-6) and the Netherlands (-5) also exhibited net losses of laureates to institutions abroad.</p>
 </section>
 </section>
 <section id="question-2" class="level2">
@@ -768,14 +784,14 @@ window.Quarto = {
 <tr class="odd">
 <td style="text-align: right;">1940</td>
 <td style="text-align: right;">54.4</td>
-<td style="text-align: right;">52.2</td>
-<td style="text-align: right;">2.2</td>
+<td style="text-align: right;">51.1</td>
+<td style="text-align: right;">3.3</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">1950</td>
 <td style="text-align: right;">53.0</td>
-<td style="text-align: right;">50.2</td>
-<td style="text-align: right;">2.8</td>
+<td style="text-align: right;">49.8</td>
+<td style="text-align: right;">3.2</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">1960</td>
@@ -785,15 +801,15 @@ window.Quarto = {
 </tr>
 <tr class="even">
 <td style="text-align: right;">1970</td>
-<td style="text-align: right;">62.4</td>
+<td style="text-align: right;">61.9</td>
 <td style="text-align: right;">53.7</td>
-<td style="text-align: right;">8.7</td>
+<td style="text-align: right;">8.2</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">1980</td>
-<td style="text-align: right;">56.5</td>
-<td style="text-align: right;">58.6</td>
-<td style="text-align: right;">-2.1</td>
+<td style="text-align: right;">56.2</td>
+<td style="text-align: right;">59.4</td>
+<td style="text-align: right;">-3.2</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">1990</td>
@@ -803,9 +819,9 @@ window.Quarto = {
 </tr>
 <tr class="odd">
 <td style="text-align: right;">2000</td>
-<td style="text-align: right;">63.7</td>
-<td style="text-align: right;">68.7</td>
-<td style="text-align: right;">-5.0</td>
+<td style="text-align: right;">65.0</td>
+<td style="text-align: right;">68.5</td>
+<td style="text-align: right;">-3.5</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">2010</td>
@@ -823,7 +839,6 @@ window.Quarto = {
 </table>
 </div>
 </div>
-<p>A key challenge was identifying the exact inflection point where Physics laureates became older on average than Chemistry laureates. By pivoting annual mean ages wider and filtering for years where Physics exceeded Chemistry, the precise crossover year was determined to be 1991.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -836,17 +851,25 @@ window.Quarto = {
 <span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> category, </span>
 <span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>              <span class="at">values_from =</span> mean_age)</span>
 <span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>crossover_year <span class="ot">&lt;-</span> annual_ages <span class="sc">|&gt;</span></span>
-<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(award_year <span class="sc">&gt;=</span> <span class="dv">1990</span>, Physics <span class="sc">&gt;</span> Chemistry) <span class="sc">|&gt;</span></span>
-<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(<span class="dv">1</span>) <span class="sc">|&gt;</span></span>
-<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(award_year)</span>
-<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>crossover_year</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>phys_2020s <span class="ot">&lt;-</span> age_trends <span class="sc">|&gt;</span> </span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(decade <span class="sc">==</span> <span class="dv">2020</span>, category <span class="sc">==</span> <span class="st">"Physics"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(mean_age)</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>chem_2020s <span class="ot">&lt;-</span> age_trends <span class="sc">|&gt;</span> </span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(decade <span class="sc">==</span> <span class="dv">2020</span>, category <span class="sc">==</span> <span class="st">"Chemistry"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(mean_age)</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>crossover_year <span class="ot">&lt;-</span> annual_ages <span class="sc">|&gt;</span></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(award_year <span class="sc">&gt;=</span> <span class="dv">1990</span>, Physics <span class="sc">&gt;</span> Chemistry) <span class="sc">|&gt;</span></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(<span class="dv">1</span>) <span class="sc">|&gt;</span></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(award_year)</span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>crossover_year</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 1991</code></pre>
 </div>
 </div>
+<p>A key challenge was identifying the exact inflection point where Physics laureates became older on average than Chemistry laureates. By pivoting annual mean ages wider and filtering for years where Physics exceeded Chemistry, the precise crossover year was determined to be 1991.</p>
 <p>A shaded rectangle was added to the background of the plot using <code>annotate("rect", ...)</code> to visually separate the pre-1991 period from the modern era.</p>
 <div class="cell">
 <details class="code-fold">
@@ -861,48 +884,45 @@ window.Quarto = {
 <span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">xmax =</span> crossover_year,</span>
 <span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">ymin =</span> <span class="sc">-</span><span class="cn">Inf</span>,</span>
 <span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">ymax =</span> <span class="cn">Inf</span>,</span>
-<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">"gray90"</span>,</span>
-<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">alpha =</span> <span class="fl">0.5</span></span>
-<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(</span>
-<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">xintercept =</span> crossover_year, </span>
-<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">linetype =</span> <span class="st">"dotted"</span>, </span>
-<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">"gray40"</span>, </span>
-<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">linewidth =</span> <span class="fl">0.8</span></span>
-<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotate</span>(</span>
-<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>    <span class="st">"text"</span>,</span>
-<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> crossover_year <span class="sc">-</span> <span class="dv">2</span>,</span>
-<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="dv">48</span>,</span>
-<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">label =</span> <span class="fu">paste0</span>(<span class="st">"Pre-"</span>, crossover_year, <span class="st">":</span><span class="sc">\n</span><span class="st">Chem older than Phys"</span>),</span>
-<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">hjust =</span> <span class="dv">1</span>,</span>
-<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">size =</span> <span class="fl">3.2</span>,</span>
-<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">"gray30"</span>,</span>
-<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a>    <span class="at">fontface =</span> <span class="st">"italic"</span></span>
-<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb15-33"><a href="#cb15-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">linewidth =</span> <span class="fl">1.1</span>) <span class="sc">+</span></span>
-<span id="cb15-34"><a href="#cb15-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="fl">2.5</span>) <span class="sc">+</span></span>
-<span id="cb15-35"><a href="#cb15-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"loess"</span>, </span>
-<span id="cb15-36"><a href="#cb15-36" aria-hidden="true" tabindex="-1"></a>              <span class="at">se =</span> <span class="cn">FALSE</span>, </span>
-<span id="cb15-37"><a href="#cb15-37" aria-hidden="true" tabindex="-1"></a>              <span class="at">linetype =</span> <span class="st">"dashed"</span>, </span>
-<span id="cb15-38"><a href="#cb15-38" aria-hidden="true" tabindex="-1"></a>              <span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
-<span id="cb15-39"><a href="#cb15-39" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb15-40"><a href="#cb15-40" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
-<span id="cb15-41"><a href="#cb15-41" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Physics Laureates Surpassed Chemistry in Average Age After 1991"</span>,</span>
-<span id="cb15-42"><a href="#cb15-42" aria-hidden="true" tabindex="-1"></a>    <span class="at">caption =</span> <span class="st">"data sourced from Nobel Prize API"</span>,</span>
-<span id="cb15-43"><a href="#cb15-43" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Award Year (by decade)"</span>,</span>
-<span id="cb15-44"><a href="#cb15-44" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Average Age at Award"</span>,</span>
-<span id="cb15-45"><a href="#cb15-45" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">"Discipline"</span></span>
-<span id="cb15-46"><a href="#cb15-46" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb15-47"><a href="#cb15-47" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb15-48"><a href="#cb15-48" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_standard</span>() <span class="sc">+</span> </span>
-<span id="cb15-49"><a href="#cb15-49" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb15-50"><a href="#cb15-50" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
-<span id="cb15-51"><a href="#cb15-51" aria-hidden="true" tabindex="-1"></a>    <span class="at">panel.grid.minor =</span> <span class="fu">element_blank</span>()</span>
-<span id="cb15-52"><a href="#cb15-52" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">alpha =</span> <span class="fl">0.2</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">xintercept =</span> crossover_year, </span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">linetype =</span> <span class="st">"dotted"</span>, </span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">linewidth =</span> <span class="fl">0.8</span></span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotate</span>(</span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>    <span class="st">"text"</span>,</span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> crossover_year <span class="sc">-</span> <span class="dv">2</span>,</span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="dv">48</span>,</span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">label =</span> <span class="fu">paste0</span>(<span class="st">"Pre-"</span>, crossover_year, <span class="st">":</span><span class="sc">\n</span><span class="st">Chem older than Phys"</span>),</span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">hjust =</span> <span class="dv">1</span>,</span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">size =</span> <span class="fl">3.2</span>,</span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">fontface =</span> <span class="st">"italic"</span></span>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">linewidth =</span> <span class="fl">1.1</span>) <span class="sc">+</span></span>
+<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="fl">2.5</span>) <span class="sc">+</span></span>
+<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"loess"</span>, </span>
+<span id="cb15-33"><a href="#cb15-33" aria-hidden="true" tabindex="-1"></a>              <span class="at">se =</span> <span class="cn">FALSE</span>, </span>
+<span id="cb15-34"><a href="#cb15-34" aria-hidden="true" tabindex="-1"></a>              <span class="at">linetype =</span> <span class="st">"dashed"</span>, </span>
+<span id="cb15-35"><a href="#cb15-35" aria-hidden="true" tabindex="-1"></a>              <span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb15-36"><a href="#cb15-36" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb15-37"><a href="#cb15-37" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb15-38"><a href="#cb15-38" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Physics Laureates Surpassed Chemistry in Average Age After 1991"</span>,</span>
+<span id="cb15-39"><a href="#cb15-39" aria-hidden="true" tabindex="-1"></a>    <span class="at">caption =</span> <span class="st">"data sourced from Nobel Prize API"</span>,</span>
+<span id="cb15-40"><a href="#cb15-40" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Award Year (by decade)"</span>,</span>
+<span id="cb15-41"><a href="#cb15-41" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Average Age at Award"</span>,</span>
+<span id="cb15-42"><a href="#cb15-42" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">"Discipline"</span></span>
+<span id="cb15-43"><a href="#cb15-43" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb15-44"><a href="#cb15-44" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb15-45"><a href="#cb15-45" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_standard</span>() <span class="sc">+</span> </span>
+<span id="cb15-46"><a href="#cb15-46" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb15-47"><a href="#cb15-47" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
+<span id="cb15-48"><a href="#cb15-48" aria-hidden="true" tabindex="-1"></a>    <span class="at">panel.grid.minor =</span> <span class="fu">element_blank</span>()</span>
+<span id="cb15-49"><a href="#cb15-49" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
@@ -913,7 +933,7 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<p>Prior to 1991, Chemistry laureates were consistently older than physicists. After 1991, Physics overtook Chemistry in average recipient age.</p>
+<p>Prior to 1991, Chemistry laureates were consistently older than physicists. After 1991, Physics overtook Chemistry in average recipient age, climbing to an average of 76.5 years in the 2020s compared to 65.7 years for Chemistry.</p>
 </section>
 </section>
 <section id="question-3" class="level2">
@@ -951,11 +971,24 @@ window.Quarto = {
 <span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Total =</span> Chemistry <span class="sc">+</span> Physics) <span class="sc">|&gt;</span></span>
 <span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(Total))</span>
 <span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(</span>
-<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>  top_10_table,</span>
-<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"Institution"</span>, <span class="st">"Chemistry"</span>, <span class="st">"Physics"</span>, <span class="st">"Total Awards"</span>),</span>
-<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">caption =</span> <span class="st">"Top 10 Research Institutions by Nobel Laureates in Physical Sciences"</span></span>
-<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>uc_total <span class="ot">&lt;-</span> top_10_table <span class="sc">|&gt;</span> </span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">str_detect</span>(affiliation_name, <span class="st">"University of California"</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(Total)</span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>uc_chem  <span class="ot">&lt;-</span> top_10_table <span class="sc">|&gt;</span> </span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">str_detect</span>(affiliation_name, <span class="st">"University of California"</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(Chemistry)</span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>uc_phys  <span class="ot">&lt;-</span> top_10_table <span class="sc">|&gt;</span> </span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">str_detect</span>(affiliation_name, <span class="st">"University of California"</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(Physics)</span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>mrc_chem <span class="ot">&lt;-</span> top_10_table <span class="sc">|&gt;</span> </span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">str_detect</span>(affiliation_name, <span class="st">"MRC Laboratory"</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(Chemistry)</span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(</span>
+<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a>  top_10_table,</span>
+<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a>  <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"Institution"</span>, <span class="st">"Chemistry"</span>, <span class="st">"Physics"</span>, <span class="st">"Total Awards"</span>),</span>
+<span id="cb17-26"><a href="#cb17-26" aria-hidden="true" tabindex="-1"></a>  <span class="at">caption =</span> <span class="st">"Top 10 Research Institutions by Nobel Laureates in Physical Sciences"</span></span>
+<span id="cb17-27"><a href="#cb17-27" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
@@ -977,21 +1010,21 @@ window.Quarto = {
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">University of California</td>
-<td style="text-align: right;">14</td>
+<td style="text-align: right;">15</td>
 <td style="text-align: right;">13</td>
-<td style="text-align: right;">27</td>
+<td style="text-align: right;">28</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Stanford University</td>
 <td style="text-align: right;">6</td>
-<td style="text-align: right;">8</td>
-<td style="text-align: right;">14</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">15</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Harvard University</td>
-<td style="text-align: right;">4</td>
+<td style="text-align: right;">5</td>
 <td style="text-align: right;">8</td>
-<td style="text-align: right;">12</td>
+<td style="text-align: right;">13</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">California Institute of Technology (Caltech)</td>
@@ -1000,28 +1033,28 @@ window.Quarto = {
 <td style="text-align: right;">11</td>
 </tr>
 <tr class="odd">
+<td style="text-align: left;">Princeton University</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">11</td>
+</tr>
+<tr class="even">
 <td style="text-align: left;">Columbia University</td>
 <td style="text-align: right;">4</td>
 <td style="text-align: right;">6</td>
 <td style="text-align: right;">10</td>
 </tr>
-<tr class="even">
-<td style="text-align: left;">Princeton University</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: right;">9</td>
-<td style="text-align: right;">10</td>
-</tr>
 <tr class="odd">
-<td style="text-align: left;">University of Cambridge</td>
+<td style="text-align: left;">Massachusetts Institute of Technology (MIT)</td>
 <td style="text-align: right;">3</td>
 <td style="text-align: right;">7</td>
 <td style="text-align: right;">10</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">Massachusetts Institute of Technology (MIT)</td>
+<td style="text-align: left;">University of Cambridge</td>
 <td style="text-align: right;">3</td>
-<td style="text-align: right;">6</td>
-<td style="text-align: right;">9</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">10</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">MRC Laboratory of Molecular Biology</td>
@@ -1075,7 +1108,7 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<p>The top 10 institutions are dominated by American and British universities. The University of California system produced the most laureates overall (27 total), showing a balanced distribution between Chemistry (14) and Physics (13). Other institutions showed strong specialization: Stanford, Harvard, and Princeton produced primarily Physics laureates, while the MRC Laboratory of Molecular Biology in Cambridge produced 8 Chemistry laureates and zero in Physics.</p>
+<p>The top 10 institutions are dominated by American and British universities. The University of California system produced the most laureates overall (28 total), showing a balanced distribution between Chemistry (15) and Physics (13). Other institutions showed strong specialization: Stanford, Harvard, and Princeton produced primarily Physics laureates, while the MRC Laboratory of Molecular Biology in Cambridge produced 8 Chemistry laureates and zero in Physics.</p>
 </section>
 </section>
 <section id="question-4" class="level2">
@@ -1130,56 +1163,56 @@ window.Quarto = {
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">Jan</td>
-<td style="text-align: right;">31</td>
-<td style="text-align: right;">7.5</td>
+<td style="text-align: right;">32</td>
+<td style="text-align: right;">7.6</td>
 <td style="text-align: right;">8.3</td>
-<td style="text-align: right;">-0.8</td>
+<td style="text-align: right;">-0.7</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Feb</td>
 <td style="text-align: right;">29</td>
-<td style="text-align: right;">7.1</td>
+<td style="text-align: right;">6.9</td>
 <td style="text-align: right;">8.3</td>
-<td style="text-align: right;">-1.2</td>
+<td style="text-align: right;">-1.4</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Mar</td>
-<td style="text-align: right;">36</td>
+<td style="text-align: right;">37</td>
 <td style="text-align: right;">8.8</td>
 <td style="text-align: right;">8.3</td>
 <td style="text-align: right;">0.5</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Apr</td>
-<td style="text-align: right;">28</td>
-<td style="text-align: right;">6.8</td>
+<td style="text-align: right;">29</td>
+<td style="text-align: right;">6.9</td>
 <td style="text-align: right;">8.3</td>
-<td style="text-align: right;">-1.5</td>
+<td style="text-align: right;">-1.4</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">May</td>
 <td style="text-align: right;">39</td>
-<td style="text-align: right;">9.5</td>
+<td style="text-align: right;">9.2</td>
 <td style="text-align: right;">8.3</td>
-<td style="text-align: right;">1.2</td>
+<td style="text-align: right;">0.9</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Jun</td>
-<td style="text-align: right;">37</td>
-<td style="text-align: right;">9.0</td>
+<td style="text-align: right;">39</td>
+<td style="text-align: right;">9.2</td>
 <td style="text-align: right;">8.3</td>
-<td style="text-align: right;">0.7</td>
+<td style="text-align: right;">0.9</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Jul</td>
-<td style="text-align: right;">37</td>
+<td style="text-align: right;">38</td>
 <td style="text-align: right;">9.0</td>
 <td style="text-align: right;">8.3</td>
 <td style="text-align: right;">0.7</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Aug</td>
-<td style="text-align: right;">39</td>
+<td style="text-align: right;">40</td>
 <td style="text-align: right;">9.5</td>
 <td style="text-align: right;">8.3</td>
 <td style="text-align: right;">1.2</td>
@@ -1187,30 +1220,30 @@ window.Quarto = {
 <tr class="odd">
 <td style="text-align: left;">Sep</td>
 <td style="text-align: right;">43</td>
-<td style="text-align: right;">10.5</td>
+<td style="text-align: right;">10.2</td>
 <td style="text-align: right;">8.3</td>
-<td style="text-align: right;">2.2</td>
+<td style="text-align: right;">1.9</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Oct</td>
-<td style="text-align: right;">32</td>
-<td style="text-align: right;">7.8</td>
+<td style="text-align: right;">34</td>
+<td style="text-align: right;">8.1</td>
 <td style="text-align: right;">8.3</td>
-<td style="text-align: right;">-0.5</td>
+<td style="text-align: right;">-0.2</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Nov</td>
-<td style="text-align: right;">27</td>
+<td style="text-align: right;">28</td>
 <td style="text-align: right;">6.6</td>
 <td style="text-align: right;">8.3</td>
 <td style="text-align: right;">-1.7</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Dec</td>
-<td style="text-align: right;">33</td>
-<td style="text-align: right;">8.0</td>
+<td style="text-align: right;">34</td>
+<td style="text-align: right;">8.1</td>
 <td style="text-align: right;">8.3</td>
-<td style="text-align: right;">-0.3</td>
+<td style="text-align: right;">-0.2</td>
 </tr>
 </tbody>
 </table>
@@ -1241,7 +1274,7 @@ window.Quarto = {
 <span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">fontface =</span> <span class="st">"italic"</span></span>
 <span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
 <span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
-<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Birth Month Distribution: Physics &amp; Chemistry Laureates"</span>,</span>
+<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Birth Month Shows No Evidence of a Relative Age Effect"</span>,</span>
 <span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">caption =</span> <span class="st">"data sourced from Nobel Prize API"</span>,</span>
 <span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Birth Month"</span>,</span>
 <span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Number of Laureates"</span>,</span>
@@ -1253,7 +1286,7 @@ window.Quarto = {
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="Assignment10B-KCH-Codebase_files/figure-html/question-4-plot-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption>Birth Month Distribution: Physics &amp; Chemistry Laureates</figcaption>
+<figcaption>Birth Month Shows No Evidence of a Relative Age Effect</figcaption>
 </figure>
 </div>
 </div>
@@ -1268,7 +1301,12 @@ window.Quarto = {
 <span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>         <span class="st">`</span><span class="at">dof</span><span class="st">`</span> <span class="ot">=</span> parameter,</span>
 <span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>         <span class="st">`</span><span class="at">method</span><span class="st">`</span> <span class="ot">=</span> method)</span>
 <span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(chisq_table, <span class="at">caption =</span> <span class="st">"Goodness-of-Fit Test for Monthly Birth Uniformity"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>min_month  <span class="ot">&lt;-</span> monthly_totals <span class="sc">|&gt;</span> <span class="fu">slice_min</span>(total, <span class="at">n =</span> <span class="dv">1</span>)</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>max_month  <span class="ot">&lt;-</span> monthly_totals <span class="sc">|&gt;</span> <span class="fu">slice_max</span>(total, <span class="at">n =</span> <span class="dv">1</span>)</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>chi_stat   <span class="ot">&lt;-</span> <span class="fu">round</span>(chisq_res<span class="sc">$</span>statistic, <span class="dv">2</span>)</span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>chi_pval   <span class="ot">&lt;-</span> <span class="fu">round</span>(chisq_res<span class="sc">$</span>p.value, <span class="dv">2</span>)</span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(chisq_table, <span class="at">caption =</span> <span class="st">"Goodness-of-Fit Test for Monthly Birth Uniformity"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
@@ -1282,7 +1320,7 @@ window.Quarto = {
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: right;">0.7074073</td>
+<td style="text-align: right;">0.7525672</td>
 <td style="text-align: right;">11</td>
 <td style="text-align: left;">Chi-squared test for given probabilities</td>
 </tr>
@@ -1290,7 +1328,7 @@ window.Quarto = {
 </table>
 </div>
 </div>
-<p>The birth month distribution remained relatively uniform, ranging from a low of 27 laureates in November to a high of 43 in September. A Chi-square goodness-of-fit test was conducted on the monthly totals, yielding (<span class="math inline">\(\chi^2 = 8.07, p = 0.71\)</span>). Because the p-value is well above the 0.05 threshold, the null hypothesis is not rejected, confirming that birth month does not have a statistically significant relationship with winning a Nobel Prize in Physics or Chemistry.</p>
+<p>The birth month distribution remained relatively uniform, ranging from a low of 27 28 laureates in Nov to a high of 43 in Sep.&nbsp;A Chi-square goodness-of-fit test was conducted on the monthly totals, yielding (<span class="math inline">\(\chi^2 = 7.55, p = 0.75\)</span>). Because the p-value is well above the 0.05 threshold, the null hypothesis is not rejected, confirming that birth month does not have a statistically significant relationship with winning a Nobel Prize in Physics or Chemistry.</p>
 </section>
 </section>
 <section id="question-5" class="level2">
@@ -1321,17 +1359,22 @@ window.Quarto = {
 <span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(prizes_count), </span>
 <span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a>          gap_years)</span>
 <span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(</span>
-<span id="cb22-22"><a href="#cb22-22" aria-hidden="true" tabindex="-1"></a>  repeat_laureates <span class="sc">|&gt;</span> </span>
-<span id="cb22-23"><a href="#cb22-23" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(</span>
-<span id="cb22-24"><a href="#cb22-24" aria-hidden="true" tabindex="-1"></a>      <span class="at">Laureate =</span> known_name,</span>
-<span id="cb22-25"><a href="#cb22-25" aria-hidden="true" tabindex="-1"></a>      <span class="st">`</span><span class="at">Prizes Won</span><span class="st">`</span> <span class="ot">=</span> prizes_count,</span>
-<span id="cb22-26"><a href="#cb22-26" aria-hidden="true" tabindex="-1"></a>      <span class="st">`</span><span class="at">Discipline(s)</span><span class="st">`</span> <span class="ot">=</span> categories,</span>
-<span id="cb22-27"><a href="#cb22-27" aria-hidden="true" tabindex="-1"></a>      <span class="st">`</span><span class="at">Years Awarded</span><span class="st">`</span> <span class="ot">=</span> years,</span>
-<span id="cb22-28"><a href="#cb22-28" aria-hidden="true" tabindex="-1"></a>      <span class="st">`</span><span class="at">Gap (Years)</span><span class="st">`</span> <span class="ot">=</span> gap_years</span>
-<span id="cb22-29"><a href="#cb22-29" aria-hidden="true" tabindex="-1"></a>    ),</span>
-<span id="cb22-30"><a href="#cb22-30" aria-hidden="true" tabindex="-1"></a>  <span class="at">caption =</span> <span class="st">"Repeat and Cross-Disciplinary Laureates in Physics and Chemistry"</span></span>
-<span id="cb22-31"><a href="#cb22-31" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a>n_repeat <span class="ot">&lt;-</span> <span class="fu">nrow</span>(repeat_laureates)</span>
+<span id="cb22-22"><a href="#cb22-22" aria-hidden="true" tabindex="-1"></a>curie_gap <span class="ot">&lt;-</span> repeat_laureates <span class="sc">|&gt;</span> </span>
+<span id="cb22-23"><a href="#cb22-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(known_name <span class="sc">==</span> <span class="st">"Marie Curie"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb22-24"><a href="#cb22-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(gap_years)</span>
+<span id="cb22-25"><a href="#cb22-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-26"><a href="#cb22-26" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(</span>
+<span id="cb22-27"><a href="#cb22-27" aria-hidden="true" tabindex="-1"></a>  repeat_laureates <span class="sc">|&gt;</span> </span>
+<span id="cb22-28"><a href="#cb22-28" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(</span>
+<span id="cb22-29"><a href="#cb22-29" aria-hidden="true" tabindex="-1"></a>      <span class="at">Laureate =</span> known_name,</span>
+<span id="cb22-30"><a href="#cb22-30" aria-hidden="true" tabindex="-1"></a>      <span class="st">`</span><span class="at">Prizes Won</span><span class="st">`</span> <span class="ot">=</span> prizes_count,</span>
+<span id="cb22-31"><a href="#cb22-31" aria-hidden="true" tabindex="-1"></a>      <span class="st">`</span><span class="at">Discipline(s)</span><span class="st">`</span> <span class="ot">=</span> categories,</span>
+<span id="cb22-32"><a href="#cb22-32" aria-hidden="true" tabindex="-1"></a>      <span class="st">`</span><span class="at">Years Awarded</span><span class="st">`</span> <span class="ot">=</span> years,</span>
+<span id="cb22-33"><a href="#cb22-33" aria-hidden="true" tabindex="-1"></a>      <span class="st">`</span><span class="at">Gap (Years)</span><span class="st">`</span> <span class="ot">=</span> gap_years</span>
+<span id="cb22-34"><a href="#cb22-34" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb22-35"><a href="#cb22-35" aria-hidden="true" tabindex="-1"></a>  <span class="at">caption =</span> <span class="st">"Repeat and Cross-Disciplinary Laureates in Physics and Chemistry"</span></span>
+<span id="cb22-36"><a href="#cb22-36" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
@@ -1388,32 +1431,33 @@ window.Quarto = {
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>p5_data <span class="ot">&lt;-</span> laureates_tidy <span class="sc">|&gt;</span></span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">semi_join</span>(repeat_laureates, <span class="at">by =</span> <span class="st">"id"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(known_name, award_year)</span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>p5_data <span class="sc">|&gt;</span> <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> award_year, </span>
-<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>                      <span class="at">y =</span> <span class="fu">fct_reorder</span>(known_name, </span>
-<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>                                      award_year, </span>
-<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>                                      min))) <span class="sc">+</span></span>
-<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">group =</span> known_name), </span>
-<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>            <span class="at">color =</span> <span class="st">"gray60"</span>,</span>
-<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>            <span class="at">linewidth =</span> <span class="fl">1.2</span>) <span class="sc">+</span></span>
-<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">color =</span> category), </span>
-<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>             <span class="at">size =</span> <span class="dv">4</span>) <span class="sc">+</span></span>
-<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> award_year),</span>
-<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>            <span class="at">vjust =</span> <span class="sc">-</span><span class="fl">1.2</span>,</span>
-<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a>            <span class="at">hjust =</span> <span class="fl">0.5</span>,</span>
-<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a>            <span class="at">size =</span> <span class="fl">3.3</span>, </span>
-<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a>            <span class="at">fontface =</span> <span class="st">"bold"</span>) <span class="sc">+</span></span>
-<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
-<span id="cb23-20"><a href="#cb23-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Marie Curie is the Only Multi-Discipline Awardee"</span>,</span>
-<span id="cb23-21"><a href="#cb23-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">caption =</span> <span class="st">"data sourced from Nobel Prize API"</span>,</span>
-<span id="cb23-22"><a href="#cb23-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Award Year"</span>,</span>
-<span id="cb23-23"><a href="#cb23-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="cn">NULL</span>,</span>
-<span id="cb23-24"><a href="#cb23-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">"Discipline"</span></span>
-<span id="cb23-25"><a href="#cb23-25" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb23-26"><a href="#cb23-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_standard</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggrepel)</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>p5_data <span class="ot">&lt;-</span> laureates_tidy <span class="sc">|&gt;</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">semi_join</span>(repeat_laureates, <span class="at">by =</span> <span class="st">"id"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(known_name, award_year)</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>p5_data <span class="sc">|&gt;</span> <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> award_year, </span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>                      <span class="at">y =</span> <span class="fu">fct_reorder</span>(known_name, </span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>                                      award_year, </span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>                                      min))) <span class="sc">+</span></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">group =</span> known_name), </span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>            <span class="at">linewidth =</span> <span class="fl">1.2</span>) <span class="sc">+</span></span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">color =</span> category), </span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>             <span class="at">size =</span> <span class="dv">4</span>) <span class="sc">+</span></span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text_repel</span>(<span class="fu">aes</span>(<span class="at">label =</span> award_year),</span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a>            <span class="at">vjust =</span> <span class="sc">-</span><span class="fl">1.2</span>,</span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a>            <span class="at">hjust =</span> <span class="fl">0.5</span>,</span>
+<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a>            <span class="at">size =</span> <span class="fl">3.3</span>, </span>
+<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a>            <span class="at">fontface =</span> <span class="st">"bold"</span>) <span class="sc">+</span></span>
+<span id="cb23-20"><a href="#cb23-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb23-21"><a href="#cb23-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Marie Curie is the Only Multi-Discipline Awardee"</span>,</span>
+<span id="cb23-22"><a href="#cb23-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">caption =</span> <span class="st">"data sourced from Nobel Prize API"</span>,</span>
+<span id="cb23-23"><a href="#cb23-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Award Year"</span>,</span>
+<span id="cb23-24"><a href="#cb23-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="cn">NULL</span>,</span>
+<span id="cb23-25"><a href="#cb23-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">"Discipline"</span></span>
+<span id="cb23-26"><a href="#cb23-26" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb23-27"><a href="#cb23-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_standard</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
@@ -1424,7 +1468,7 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<p>Only four individuals have ever won multiple Nobel prizes in the physical sciences. Of these four, Marie Curie is the only laureate to cross disciplines, winning in Physics in 1903 and Chemistry in 1911 with an 8-year gap. The remaining three individuals repeated within their specific fields: John Bardeen won two Physics prizes across a 16-year gap, while Frederick Sanger and K. Barry Sharpless each won two Chemistry prizes across gaps of 22 and 21 years, respectively.</p>
+<p>Only 4 individuals have ever won multiple Nobel prizes in the physical sciences. Of these 4, Marie Curie is the only laureate to cross disciplines, winning in Physics in 1903 and Chemistry in 1911 with an 8-year gap. The remaining three individuals repeated within their specific fields: John Bardeen won two Physics prizes across a 16-year gap, while Frederick Sanger and K. Barry Sharpless each won two Chemistry prizes across gaps of 22 and 21 years, respectively.</p>
 </section>
 </section>
 </section>
@@ -1433,6 +1477,10 @@ window.Quarto = {
 <p>This analysis demonstrates the process of pulling semi-structured JSON data from a REST API, flattening complex list-columns, and conducting comparative analysis across Physics and Chemistry.</p>
 <p>Overall, the data shows that physical science Nobel prizes have historically concentrated in American and British institutions, with the United States serving as the primary beneficiary of international scientific migration. Additionally, the average age of recipients has increased significantly over the last century, with Physics overtaking Chemistry in average recipient age after 1991. Finally, while multiple awards are extremely rare and achieved by only four individuals, calendar birth month has no significant impact on Nobel-level achievement.</p>
 <p>To extend this work, historical population data could be joined to normalize migration figures on a per-capita basis, testing whether smaller nations like Switzerland or the Netherlands produce more laureates relative to their population size. Furthermore, incorporating the prize amount data from the API could allow for an analysis of inflation-adjusted prize winnings across disciplines over time.</p>
+<section id="generative-ai-usage" class="level3">
+<h3 class="anchored" data-anchor-id="generative-ai-usage">Generative AI Usage</h3>
+<p>Generative artificial intelligence was consulted during the development of this pipeline. Specifically, Gemini 3.8 Flash via the Google web interface was utilized for constructing defensive data extraction patterns with <code>purrr::map_chr()</code>, troubleshooting date parsing logic, and assisting with the <code>annotate("rect", ...)</code> background shading logic.</p>
+</section>
 </section>
 <section id="cited-works" class="level1">
 <h1>Cited Works</h1>
@@ -1447,10 +1495,6 @@ Ooms, Jeroen. 2023. <em>Jsonlite: A Simple and Robust JSON Parser and Generator 
 Wickham, Hadley, Mara Averick, Jennifer Bryan, et al. 2019. <span>“Welcome to the <span class="nocase">tidyverse</span>.”</span> <em>Journal of Open Source Software</em> 4 (43): 1686. <a href="https://doi.org/10.21105/joss.01686">https://doi.org/10.21105/joss.01686</a>.
 </div>
 </div>
-<section id="generative-ai-usage" class="level3">
-<h3 class="anchored" data-anchor-id="generative-ai-usage">Generative AI Usage</h3>
-<p>Generative artificial intelligence was consulted during the development of this pipeline. Specifically, Gemini 3.8 Flash [@google_gemini_2026] via the Google web interface was utilized for constructing defensive data extraction patterns with <code>purrr::map_chr()</code>, troubleshooting date parsing logic, and assisting with the <code>annotate("rect", ...)</code> background shading logic.</p>
-</section>
 </section>
 
 </main>
