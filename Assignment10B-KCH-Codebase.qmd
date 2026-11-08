@@ -58,10 +58,8 @@ Beyond standard frequency counts, this study investigates five data-driven quest
 #| message: false
 #| warning: false
 
-library(httr2)
 library(jsonlite)
 library(tidyverse)
-library(lubridate)
 ```
 
 ```{r}
@@ -145,7 +143,7 @@ laureates_clean <- laureates_raw |>
 
 Handling the `affiliations` column presented a challenge: some laureates had no recorded institution, while others had multiple appointments across different universities. Unnesting this column directly caused row duplication and indexing errors. To fix this, `purrr::map_chr()` was used to check whether each row was a valid data frame with a name column before pulling the primary English name. If no valid affiliation existed, the function safely returned `NA_character_`.
 
-Next, date metrics were derived. When using `lubridate::ymd()` to parse birth dates, a warning was generated because 11 historical records only contained birth years rather than full dates. To eliminate this warning without dropping rows, base R's `format(as.Date(birth_date), "%b")` was used to extract birth months, and the resulting vector was converted to an ordered factor using `month.abb`. Finally, each laureate's age at the time of their award and the award decade were computed.
+Next, date metrics were derived. Rather than relying on `lubridate::ymd()` (which generated warnings on 11 historical records containing only four-digit years) base R's `format(as.Date(birth_date), "%b")` and `month.abb` were used. This cleanly extracts birth months as an ordered factor while preserving missing records as `NA` without throwing warnings. Finally, each laureate's age at the time of award and award decade were calculated using basic date arithmetic.
 
 ```{r}
 #| label: tidy-data
@@ -372,14 +370,12 @@ age_trends |> ggplot(aes(x = decade,
     xmax = crossover_year,
     ymin = -Inf,
     ymax = Inf,
-    fill = "gray90",
-    alpha = 0.5
+    alpha = 0.2
   ) +
   
   geom_vline(
     xintercept = crossover_year, 
     linetype = "dotted", 
-    color = "gray40", 
     linewidth = 0.8
   ) +
   
@@ -390,7 +386,6 @@ age_trends |> ggplot(aes(x = decade,
     label = paste0("Pre-", crossover_year, ":\nChem older than Phys"),
     hjust = 1,
     size = 3.2,
-    color = "gray30",
     fontface = "italic"
   ) +
   
@@ -645,6 +640,8 @@ knitr::kable(
 #| warning: false
 #| fig-cap: "Marie Curie is the Only Multi-Discipline Awardee"
 
+library(ggrepel)
+
 p5_data <- laureates_tidy |>
   semi_join(repeat_laureates, by = "id") |>
   arrange(known_name, award_year)
@@ -658,7 +655,7 @@ p5_data |> ggplot(aes(x = award_year,
             linewidth = 1.2) +
   geom_point(aes(color = category), 
              size = 4) +
-  geom_text(aes(label = award_year),
+  geom_text_repel(aes(label = award_year),
             vjust = -1.2,
             hjust = 0.5,
             size = 3.3, 
