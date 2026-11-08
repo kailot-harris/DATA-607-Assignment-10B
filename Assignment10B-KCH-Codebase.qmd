@@ -574,7 +574,8 @@ monthly_births |> ggplot(aes(x = birth_month,
     x = "Birth Month",
     y = "Number of Laureates",
     fill = "Discipline"
-  )
+  ) +
+  theme_standard()
 ```
 
 The birth month distribution remained relatively uniform, ranging from a low of 27 laureates in November to a high of 43 in September. A Chi-square goodness-of-fit test was conducted on the monthly totals, yielding \tex($\chi^2 = 8.07, p = 0.71$). Because the p-value is well above the 0.05 threshold, the null hypothesis is not rejected, confirming that birth month does not have a statistically significant relationship with winning a Nobel Prize in Physics or Chemistry.
@@ -672,3 +673,7 @@ To extend this work, historical population data could be joined to normalize mig
 
 ::: {#refs}
 :::
+
+### Generative AI Usage
+
+Generative artificial intelligence was consulted during the development of this pipeline. Specifically, Gemini 3.8 Flash \[\@google_gemini_2026\] via the Google web interface was utilized for constructing defensive data extraction patterns with `purrr::map_chr()`, troubleshooting date parsing logic, and assisting with the `annotate("rect", ...)` background shading logic.
