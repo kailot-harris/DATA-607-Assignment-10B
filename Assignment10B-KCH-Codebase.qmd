@@ -1,5 +1,5 @@
 ---
-title: "Assignment10B-KCH-Approach"
+title: "Assignment10B-KCH-Codebase"
 author: "Kailot C. Harris"
 date: "2026/11/03"
 format:
@@ -16,11 +16,11 @@ bibliography: references.bib
 
 # Introduction and Overview
 
-In this assignment, structured web data acquisition and JSON data reshaping are applied to analyze scientific history via the Nobel Prize Developer Zone API [@nobelprizeAPI].
+In this assignment, structured web data acquisition and JSON data reshaping are applied to analyze scientific history via the [Nobel Prize Developer Zone API](https://www.nobelprize.org/about/developer-zone-2/) [@nobelprizeAPI].
 
-Using the Version 2.1 REST API, laureate-level records across the physical sciences (specifically Physics and Chemistry) are ingested. The raw data are parsed from hierarchical, nested JSON documents into rectangular, tidy data frames using the `jsonlite` [@jsonlite] and `tidyverse` [@tidyverse] ecosystems.
+Using the Version 2.1 REST API, laureate records across Physics and Chemistry are ingested. The raw data are parsed from hierarchical, nested JSON documents into rectangular, tidy data frames using the `jsonlite` [@jsonlite] and `tidyverse` [@tidyverse] ecosystems.
 
-Beyond standard frequency counts, this study investigates historical mobility, collaboration, and career trajectories of famed scientists. Specifically, this work aims to examine scientific migration ("brain drain"), age distributions at time of recognition, institutional concentration of awards, seasonal birth distributions, and repeat prize winners.
+Beyond standard frequency counts, this study investigates five data-driven questions examinining scientific migration ("brain drain"), age distributions at time of recognition, institutional concentration of awards, seasonal birth distributions, and repeat prize winners.
 
 # Approach
 
