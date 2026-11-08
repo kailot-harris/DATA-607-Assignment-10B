@@ -128,7 +128,7 @@ laureates_clean <- laureates_raw |>
          birth_country = birth$place$country$en,
          nobelPrizes = nobelPrizes,
          .keep = "none"
-          ) |> 
+  ) |> 
   unnest(nobelPrizes) |> 
   mutate(
     id = id,
@@ -542,12 +542,9 @@ knitr::kable(
 #| echo: true
 #| message: false
 #| warning: false
+#| fig-cap: "Birth Month Distribution: Physics & Chemistry Laureates"
 
 expected_per_month <- sum(monthly_births$count) / 12
-
-chisq_res <- chisq.test(monthly_totals$total)
-
-chisq_res
 
 monthly_births |> ggplot(aes(x = birth_month, 
                              y = count, 
@@ -576,6 +573,22 @@ monthly_births |> ggplot(aes(x = birth_month,
     fill = "Discipline"
   ) +
   theme_standard()
+```
+
+```{r}
+#| label: question-4-chi-sq
+#| echo: true
+#| message: false
+#| warning: false
+
+chisq_res <- chisq.test(monthly_totals$total)
+
+chisq_table <- broom::tidy(chisq_res) |>
+  select(`p_value` = p.value,
+         `dof` = parameter,
+         `method` = method)
+
+knitr::kable(chisq_table, caption = "Goodness-of-Fit Test for Monthly Birth Uniformity")
 ```
 
 The birth month distribution remained relatively uniform, ranging from a low of 27 laureates in November to a high of 43 in September. A Chi-square goodness-of-fit test was conducted on the monthly totals, yielding \tex($\chi^2 = 8.07, p = 0.71$). Because the p-value is well above the 0.05 threshold, the null hypothesis is not rejected, confirming that birth month does not have a statistically significant relationship with winning a Nobel Prize in Physics or Chemistry.
@@ -630,6 +643,7 @@ knitr::kable(
 #| echo: true
 #| message: false
 #| warning: false
+#| fig-cap: "Marie Curie is the Only Multi-Discipline Awardee"
 
 p5_data <- laureates_tidy |>
   semi_join(repeat_laureates, by = "id") |>
