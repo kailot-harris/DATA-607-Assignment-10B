@@ -369,12 +369,17 @@ crossover_year <- annual_ages |>
   slice(1) |>
   pull(award_year)
 
+crossover_decade <- age_summary_table |>
+  filter(difference_chem_minus_phys < 0) |>
+  slice(1) |>
+  pull(decade)
+
 crossover_year
 ```
 
-A key challenge was identifying the exact inflection point where Physics laureates became older on average than Chemistry laureates. By pivoting annual mean ages wider and filtering for years where Physics exceeded Chemistry, the precise crossover year was determined to be `r crossover_year`.
+A key challenge was identifying the exact inflection point where Physics laureates became older on average than Chemistry laureates. By pivoting annual mean ages wider and filtering for years where Physics exceeded Chemistry, the precise crossover year was determined to be `r crossover_year` and within `r crossover_decade`.
 
-A shaded rectangle was added to the background of the plot using `annotate("rect", ...)` to visually separate the pre-1991 period from the modern era.
+A shaded rectangle was added to the background of the plot using `annotate("rect", ...)` to visually separate the pre-'r crossover_year' period from the modern era.
 
 ```{r}
 #| label: question-2-plot
@@ -435,7 +440,7 @@ age_trends |> ggplot(aes(x = decade,
 
 ```
 
-Prior to `r crossover_year`, Chemistry laureates were consistently older than physicists. After `r crossover_year`, Physics overtook Chemistry in average recipient age, climbing to an average of `r phys_2020s` years in the 2020s compared to `r chem_2020s` years for Chemistry.
+Prior to the 1980s, Chemistry laureates were consistently older on average than physicists. Beginning in the `r crossover_decade`, Physics recipient ages began exceeding Chemistry in multiple decades (reaching an average of `r phys_2020s` in the 2020s compared to `r chem_2020s` for Chemistry), reflecting the lengthened experimental timelines required to verify modern physical theories.
 
 ## Question 3
 
@@ -627,7 +632,7 @@ chi_pval   <- round(chisq_res$p.value, 2)
 knitr::kable(chisq_table, caption = "Goodness-of-Fit Test for Monthly Birth Uniformity")
 ```
 
-The birth month distribution remained relatively uniform, ranging from a low of 27 `r min_month$total` laureates in `r min_month$birth_month` to a high of `r max_month$total` in `r max_month$birth_month`. A Chi-square goodness-of-fit test was conducted on the monthly totals, yielding ($\chi^2 = `r chi_stat`, p = `r chi_pval`$). Because the p-value is well above the 0.05 threshold, the null hypothesis is not rejected, confirming that birth month does not have a statistically significant relationship with winning a Nobel Prize in Physics or Chemistry.
+The birth month distribution remained relatively uniform, ranging from a low of 27 `r min_month$total` laureates in `r min_month$birth_month` to a high of `r max_month$total` in `r max_month$birth_month`. A Chi-square goodness-of-fit test was conducted on the monthly totals, yielding ($\chi^2 = `r chi_stat`, p = `r chi_pval`$). Because $p > 0.05$, the null hypothesis is not rejected; the sample provides no statistically significant evidence of a relative age effect among Nobel laureates in Physics and Chemistry.
 
 ## Question 5
 

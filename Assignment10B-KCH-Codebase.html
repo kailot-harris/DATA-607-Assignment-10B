@@ -863,14 +863,19 @@ window.Quarto = {
 <span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(<span class="dv">1</span>) <span class="sc">|&gt;</span></span>
 <span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(award_year)</span>
 <span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>crossover_year</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>crossover_decade <span class="ot">&lt;-</span> age_summary_table <span class="sc">|&gt;</span></span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(difference_chem_minus_phys <span class="sc">&lt;</span> <span class="dv">0</span>) <span class="sc">|&gt;</span></span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(<span class="dv">1</span>) <span class="sc">|&gt;</span></span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(decade)</span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>crossover_year</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 1991</code></pre>
 </div>
 </div>
-<p>A key challenge was identifying the exact inflection point where Physics laureates became older on average than Chemistry laureates. By pivoting annual mean ages wider and filtering for years where Physics exceeded Chemistry, the precise crossover year was determined to be 1991.</p>
-<p>A shaded rectangle was added to the background of the plot using <code>annotate("rect", ...)</code> to visually separate the pre-1991 period from the modern era.</p>
+<p>A key challenge was identifying the exact inflection point where Physics laureates became older on average than Chemistry laureates. By pivoting annual mean ages wider and filtering for years where Physics exceeded Chemistry, the precise crossover year was determined to be 1991 and within 1980.</p>
+<p>A shaded rectangle was added to the background of the plot using <code>annotate("rect", ...)</code> to visually separate the pre-‘r crossover_year’ period from the modern era.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -933,7 +938,7 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<p>Prior to 1991, Chemistry laureates were consistently older than physicists. After 1991, Physics overtook Chemistry in average recipient age, climbing to an average of 76.5 years in the 2020s compared to 65.7 years for Chemistry.</p>
+<p>Prior to the 1980s, Chemistry laureates were consistently older on average than physicists. Beginning in the 1980, Physics recipient ages began exceeding Chemistry in multiple decades (reaching an average of 76.5 in the 2020s compared to 65.7 for Chemistry), reflecting the lengthened experimental timelines required to verify modern physical theories.</p>
 </section>
 </section>
 <section id="question-3" class="level2">
@@ -1328,7 +1333,7 @@ window.Quarto = {
 </table>
 </div>
 </div>
-<p>The birth month distribution remained relatively uniform, ranging from a low of 27 28 laureates in Nov to a high of 43 in Sep.&nbsp;A Chi-square goodness-of-fit test was conducted on the monthly totals, yielding (<span class="math inline">\(\chi^2 = 7.55, p = 0.75\)</span>). Because the p-value is well above the 0.05 threshold, the null hypothesis is not rejected, confirming that birth month does not have a statistically significant relationship with winning a Nobel Prize in Physics or Chemistry.</p>
+<p>The birth month distribution remained relatively uniform, ranging from a low of 27 28 laureates in Nov to a high of 43 in Sep.&nbsp;A Chi-square goodness-of-fit test was conducted on the monthly totals, yielding (<span class="math inline">\(\chi^2 = 7.55, p = 0.75\)</span>). Because <span class="math inline">\(p &gt; 0.05\)</span>, the null hypothesis is not rejected; the sample provides no statistically significant evidence of a relative age effect among Nobel laureates in Physics and Chemistry.</p>
 </section>
 </section>
 <section id="question-5" class="level2">
