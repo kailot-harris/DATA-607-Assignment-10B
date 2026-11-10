@@ -92,7 +92,7 @@ get_nobel_data <- function(file = "laureates.rds") {
 }
 ```
 
-Data is ingested from the Nobel Prize Developer Zone API using an HTTP request. The API restricts output to 25 items by default, so a limit parameter of 1,000 was added to the query URL to retrieve all historical laureates in a single pull.
+Data is ingested from the Nobel Prize Developer Zone API using an HTTP request. The API restricts output to 25 items by default, so a limit parameter of 1,400 was added to the query URL to retrieve all historical laureates in a single pull.
 
 To prevent repeated calls to the live API during rendering, a function was built using `tryCatch()` to cache the data locally. Initially, saving the parsed JSON payload directly to an Apache Parquet file caused an error because the list-columns inside the raw data frame were too deeply nested for Parquet's schema. This was resolved by saving the object as a local `.rds` file using `saveRDS()`. On subsequent runs, the function checks for the presence of this file and loads it directly from disk.
 
